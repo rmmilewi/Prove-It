@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" />
+<title>Proof of proveit.logic.set_theory.enumeration.singletonDef theorem</title>
+
+<style type="text/css">
+/* Overrides of notebook CSS for static HTML export */
+body {
+  overflow: visible;
+  padding: 8px;
+}
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  } 
+  div.output_wrapper { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+  div.output { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+}
+</style>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="notebook.css">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+</script></head>
+<body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
+    <a href="../../../../../../index.html"><img src="../../../../../../pv_it.png" alt="logo" style="width:50px;float:left;position:absolute"></a> 
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Proof-of-proveit.logic.set_theory.enumeration.singletonDef-theorem">Proof of <a class="ProveItLink" href="../../../../_context_.html">proveit</a>.<a class="ProveItLink" href="../../../_context_.html">logic</a>.<a class="ProveItLink" href="../../_context_.html">set_theory</a>.<a class="ProveItLink" href="../_context_.html">enumeration</a>.<a class="ProveItLink" href="../_theorems_.html#singletonDef">singletonDef</a> theorem<a class="anchor-link" href="#Proof-of-proveit.logic.set_theory.enumeration.singletonDef-theorem">&#182;</a></h1><p><strong><em> see <a href="../__pv_it/b375ce77e19409a2cd3e0128d32580c0df6fa3340/dependencies.html" class="ProveItLink">dependencies</a> </em></strong></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">proveit</span>
+<span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">Equals</span>
+<span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">l</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">A</span>
+<span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">num</span>
+<span class="kn">from</span> <span class="nn">proveit.number.numeral.deci._theorems_</span> <span class="k">import</span> <span class="n">nat1</span>
+<span class="kn">from</span> <span class="nn">proveit.logic._common_</span> <span class="k">import</span> <span class="n">yIter1l</span>
+<span class="kn">from</span> <span class="nn">proveit.logic.boolean.disjunction._theorems_</span> <span class="k">import</span> <span class="n">unaryDisjunctionDef</span>
+<span class="kn">from</span> <span class="nn">proveit.logic.set_theory.enumeration._axioms_</span> <span class="k">import</span> <span class="n">enumSetDef</span>
+<span class="o">%</span><span class="k">proving</span> singletonDef presuming [nat1, unaryDisjunctionDef]
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Beginning proof of singletonDef
+Recorded &#39;presuming&#39; information
+Presuming proveit.logic.boolean.disjunction.unaryDisjunctionDef, proveit.number.numeral.deci.nat1 theorems (applied transitively).
+Presuming previous theorems (applied transitively).
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[1]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="singletonDef">singletonDef:</strong> <a class="ProveItLink" href="../__pv_it/0757ca7a1e2afb098357ada617cb72c2ce83de3c0/expr.html"><img src="../__pv_it/0757ca7a1e2afb098357ada617cb72c2ce83de3c0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>(see <a class="ProveItLink" href="../__pv_it/0757ca7a1e2afb098357ada617cb72c2ce83de3c0/dependencies.html">dependencies</a>)<br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">step1</span> <span class="o">=</span> <span class="n">enumSetDef</span><span class="o">.</span><span class="n">specialize</span><span class="p">({</span><span class="n">l</span><span class="p">:</span><span class="n">num</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">,</span> <span class="n">yy</span><span class="p">:[</span><span class="n">y</span><span class="p">]})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[2]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="step1">step1:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/23eb0b59c6a1c0dcfe33a646cdd86b58e63d199f0/expr.html"><img src="../__pv_it/23eb0b59c6a1c0dcfe33a646cdd86b58e63d199f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">intermediateStep</span> <span class="o">=</span> <span class="n">unaryDisjunctionDef</span><span class="o">.</span><span class="n">specialize</span><span class="p">({</span><span class="n">A</span><span class="p">:</span><span class="n">Equals</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[3]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="intermediateStep">intermediateStep:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/79ef0a6a747acec4ea37a3d5010235bc1e56d5b50/expr.html"><img src="../__pv_it/79ef0a6a747acec4ea37a3d5010235bc1e56d5b50/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">step2</span> <span class="o">=</span> <span class="n">step1</span><span class="o">.</span><span class="n">subLeftSideInto</span><span class="p">(</span><span class="n">intermediateStep</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[4]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="step2">step2:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/7312af8e4de252623d99eea19463efb2769bf9f10/expr.html"><img src="../__pv_it/7312af8e4de252623d99eea19463efb2769bf9f10/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">step2</span><span class="o">.</span><span class="n">generalize</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>singletonDef has been proven.  Now simply execute &#34;%qed&#34;.
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[5]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/0757ca7a1e2afb098357ada617cb72c2ce83de3c0/expr.html"><img src="../__pv_it/0757ca7a1e2afb098357ada617cb72c2ce83de3c0/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">qed</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[6]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>generalizaton</td><td>1</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/0757ca7a1e2afb098357ada617cb72c2ce83de3c0/expr.html"><img src="../__pv_it/0757ca7a1e2afb098357ada617cb72c2ce83de3c0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>1</td><td>specialization</td><td>2, 3, 4</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/7312af8e4de252623d99eea19463efb2769bf9f10/expr.html"><img src="../__pv_it/7312af8e4de252623d99eea19463efb2769bf9f10/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../__pv_it/fd4b0a418766985890fb332a124e981d1643d8330/expr.html"><img src="../__pv_it/fd4b0a418766985890fb332a124e981d1643d8330/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../__pv_it/4ba0c2cb9c3e5c51db21f8203e16c0a5938baba10/expr.html"><img src="../__pv_it/4ba0c2cb9c3e5c51db21f8203e16c0a5938baba10/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../__pv_it/10c3c82689f4c3a29234bbaf6cb70eab8dfee7be0/expr.html"><img src="../__pv_it/10c3c82689f4c3a29234bbaf6cb70eab8dfee7be0/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../../../../__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.html"><img src="../../../../__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../__pv_it/95af2c95f1c840ea5311ef75528443075e7598850/expr.html"><img src="../__pv_it/95af2c95f1c840ea5311ef75528443075e7598850/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>2</td><td>theorem</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../../../equality/__pv_it/0ff28639b67648f982114c9abc0eb1af3cbddacb0/expr.html"><img src="../../../equality/__pv_it/0ff28639b67648f982114c9abc0eb1af3cbddacb0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../../../equality/_proofs_/subLeftSideInto.html">proveit.logic.equality.subLeftSideInto</a></td></tr><tr><td>3</td><td>specialization</td><td>5, 6</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/79ef0a6a747acec4ea37a3d5010235bc1e56d5b50/expr.html"><img src="../__pv_it/79ef0a6a747acec4ea37a3d5010235bc1e56d5b50/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../../../../__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../../../../__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../__pv_it/74ae967be5bd1c096ad29ed9e31ac59a533f07b30/expr.html"><img src="../__pv_it/74ae967be5bd1c096ad29ed9e31ac59a533f07b30/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>4</td><td>specialization</td><td>7, 8</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/23eb0b59c6a1c0dcfe33a646cdd86b58e63d199f0/expr.html"><img src="../__pv_it/23eb0b59c6a1c0dcfe33a646cdd86b58e63d199f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../../../../__pv_it/3e5d49a51123592869b160296a6e123a424e07a70/expr.html"><img src="../../../../__pv_it/3e5d49a51123592869b160296a6e123a424e07a70/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../../../../number/numeral/__pv_it/9be8badea4c35b9724062cecc501d17a3158d1d20/expr.html"><img src="../../../../number/numeral/__pv_it/9be8badea4c35b9724062cecc501d17a3158d1d20/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../../../../__pv_it/23a8703a0497efbbce779bb784cd8c2fbbfa1f580/expr.html"><img src="../../../../__pv_it/23a8703a0497efbbce779bb784cd8c2fbbfa1f580/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../__pv_it/69f043e84c2bcbf7e8af6c9346c290b79911080a0/expr.html"><img src="../__pv_it/69f043e84c2bcbf7e8af6c9346c290b79911080a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>5</td><td>theorem</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../../../boolean/disjunction/__pv_it/ea7cdc97bb19dd3f63221c57941793bcf9c4e7e30/expr.html"><img src="../../../boolean/disjunction/__pv_it/ea7cdc97bb19dd3f63221c57941793bcf9c4e7e30/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../../../boolean/disjunction/_proofs_/unaryDisjunctionDef.html">proveit.logic.boolean.disjunction.unaryDisjunctionDef</a></td></tr><tr><td>6</td><td>specialization</td><td>9</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/8ec25d6a29369c59943e306a4344b3ade656bf790/expr.html"><img src="../__pv_it/8ec25d6a29369c59943e306a4344b3ade656bf790/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="../../../../__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../../../../__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.html"><img src="../../../../__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../../../../__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.html"><img src="../../../../__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>7</td><td>axiom</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../__pv_it/7dba39d4c9b521f535b0b5b677905e8a2bf289dc0/expr.html"><img src="../__pv_it/7dba39d4c9b521f535b0b5b677905e8a2bf289dc0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../_axioms_.html#enumSetDef">proveit.logic.set_theory.enumeration.enumSetDef</a></td></tr><tr><td>8</td><td>theorem</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../../../../number/numeral/deci/__pv_it/3f15fb519636fc585376b5b502be456d654dd18d0/expr.html"><img src="../../../../number/numeral/deci/__pv_it/3f15fb519636fc585376b5b502be456d654dd18d0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../../../../number/numeral/deci/_proofs_/nat1.html">proveit.number.numeral.deci.nat1</a></td></tr><tr><td>9</td><td>axiom</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../../../equality/__pv_it/40d65510253ebe9c23b6d82fc4fef69ccf2845ac0/expr.html"><img src="../../../equality/__pv_it/40d65510253ebe9c23b6d82fc4fef69ccf2845ac0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../../../equality/_axioms_.html#equalityInBool">proveit.logic.equality.equalityInBool</a></td></tr></table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    </div>
+  </div>
+<footer>
+  <p>These web pages were generated on 2019-07-15 by <a href="https://github.com/PyProveIt/Prove-It">Prove-It</a> Beta Version 0.3, licensed under the GNU Public License by Sandia Corporation.</p>
+  <p>Presented proofs are not absolutely guaranteed.  For assurance, it is important to check the structure 
+  of the statement being proven, independently verify the derivation steps, track dependencies, and ensure that 
+  employed axioms are valid and properly structured.  Inconsistencies may exist, unknowingly, in this system.
+  </p>
+  <p>
+  This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research, under the Quantum Computing Application Teams program. Sandia National Labs is managed and operated by National Technology and Engineering Solutions of Sandia, LLC, a subsidiary of Honeywell International, Inc., for the U.S. Dept. of Energy's NNSA under contract DE-NA0003525. The views expressed above do not necessarily represent the views of the DOE or the U.S. Government.
+  </p>
+  <br>
+  <p>Please send questions/comments to: <a href="mailto:wwitzel@sandia.gov">
+  wwitzel@sandia.gov</a>.</p>
+</footer> 
+</body>
+
+ 
+
+
+</html>

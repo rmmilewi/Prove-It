@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" />
+<title>Chapter 3.  Implication</title>
+
+<style type="text/css">
+/* Overrides of notebook CSS for static HTML export */
+body {
+  overflow: visible;
+  padding: 8px;
+}
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  } 
+  div.output_wrapper { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+  div.output { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+}
+</style>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="notebook.css">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+</script></head>
+<body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
+    <a href="../index.html"><img src="../pv_it.png" alt="logo" style="width:50px;float:left;position:absolute"></a> 
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Chapter-3.--Implication">Chapter 3.  Implication<a class="anchor-link" href="#Chapter-3.--Implication">&#182;</a></h1><p>An implication has an antecedent and a consequent.  If the antecedent is true, the consequent must also be true.  <strong>Prove-It</strong> has an <code>Implies</code> <strong>operation</strong> that may be used to represent an implication, formatted with the $\Rightarrow$ symbol.  While this is a concept used in the core, <code>Implies</code> is actually defined outside of the core in the <code>proveit.logic</code> package.  It is known in the core for use in the <em>modus ponens</em> and <em>hypothetical reasoning</em> derivation steps discussed below.  First we will take a brief tour of the <code>Implies</code> class.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">X</span>
+<span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">Implies</span> 
+<span class="o">%</span><span class="k">begin</span> implication
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[2]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="A_impl_B">A_impl_B:</strong> <a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Implies is an Operation:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[3]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operands:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/logic/boolean/implication/__pv_it/e5c030cabcb650938f92dee8256fe11cd12bf9b30/expr.html"><img src="../packages/proveit/logic/boolean/implication/__pv_it/e5c030cabcb650938f92dee8256fe11cd12bf9b30/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>2</td><td>ExprList</td><td>3, 4</td><td><a class="ProveItLink" href="__pv_it/06a72e8706d1c13b268a9445a249c41d479d50850/expr.html"><img src="__pv_it/06a72e8706d1c13b268a9445a249c41d479d50850/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>3</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>4</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>One can access the <code>antecedent</code> and the <code>consequent</code> of the implication:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B</span><span class="o">.</span><span class="n">antecedent</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[4]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B</span><span class="o">.</span><span class="n">consequent</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[5]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Modus-Ponens">Modus Ponens<a class="anchor-link" href="#Modus-Ponens">&#182;</a></h2><p><em>Modus ponens</em> is a straightforward derivation step in which you can derive $B$ assuming that $A \Rightarrow B$ and $A$ are both true statements.  You can apply this derivation step explicitly by calling the <code>deriveConsequent</code> method of any <code>Implies</code> object.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">B_from_A</span> <span class="o">=</span> <span class="n">A_impl_B</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">A_impl_B</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[6]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="B_from_A">B_from_A:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.html"><img src="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Recall from the previous tutorial chapter that <strong>Prove-It</strong>, in its core, is not concerned about truth-aptness.  Neither $A$ nor $B$ are required to be intrinsically truth-apt.  The above <strong>known truth</strong> simply means that $B$ is a true statement if we assume that $A$ and $A \Rightarrow B$ are true statements.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">B_from_A</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[7]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>modus ponens</td><td>1, 2</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.html"><img src="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>1</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.html"><img src="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In order for the <em>modus ponens</em> derivation step to succeed, the implication and the hypothesis must be proven to be true under the applicable assumptions.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ModusPonensFailure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">A_impl_B</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">[</span><span class="n">A</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ModusPonensFailure error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ModusPonensFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Unable to prove B assuming {A}: Implication, A =&gt; B, is not proven
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ModusPonensFailure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">A_impl_B</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">[</span><span class="n">A_impl_B</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ModusPonensFailure error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ModusPonensFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Unable to prove B assuming {A =&gt; B}: Antecedent of A =&gt; B is not proven
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When a <strong>known truth</strong> wraps an <strong>implication</strong>, the <strong>assumptions</strong> of the <strong>known truth</strong> are automatically added.  This is the case for any <code>Expression</code> method that accepts an <code>assumptions</code> argument and is called indirectly through a <code>KnownTruth</code> object that wraps the <code>Expression</code> object.  We demonstrate this in the following two cells:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B_truth</span> <span class="o">=</span> <span class="n">A_impl_B</span><span class="o">.</span><span class="n">prove</span><span class="p">([</span><span class="n">A_impl_B</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[10]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="A_impl_B_truth">A_impl_B_truth:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.html"><img src="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># A =&gt; B is automatically included as an assumption because it is </span>
+<span class="c1"># an assumption of A_impl_B_truth</span>
+<span class="n">A_impl_B_truth</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">[</span><span class="n">A</span><span class="p">])</span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[11]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.html"><img src="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Using-an-overcomplete-set-of-assumptions">Using an overcomplete set of assumptions<a class="anchor-link" href="#Using-an-overcomplete-set-of-assumptions">&#182;</a></h3><p>When taking any derivation step under a set of assumptions, any assumptions that are unnecessary will be discarded.  In the example below, we include $C$ as an extra, irrelevant assumption.  It is discarded as it is not needed in the proof.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">[</span><span class="n">A_impl_B</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">C</span><span class="p">])</span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[12]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/a2e36143adb5c3bd3253747e981635e079c2ab500/expr.html"><img src="__pv_it/a2e36143adb5c3bd3253747e981635e079c2ab500/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Hypothetical-Reasoning">Hypothetical Reasoning<a class="anchor-link" href="#Hypothetical-Reasoning">&#182;</a></h2><p><em>Hypothothetical reasoning</em> is, in some sense, the reverse process of <em>modus ponens</em>.  In <em>modus ponens</em> the consequent is derived from an implication (and its antecedent).  In <em>hypothetical reasoning</em> the implication is derived from the consequent, discarding the antecedent as an assumption.  A common notation to indicate a derivation rule is to display a horizontal line with a new truth below the line that can be derived from what is above the line.  Using this notation, we have</p>
+<p>Modus ponens: 
+$\begin{array}{c}
+\vdash A \Rightarrow B \\
+\hline
+\{A\} \vdash B
+\end{array}$</p>
+<p>Hypothetical reasoning: 
+$\begin{array}{c}
+\{A\} \vdash B \\
+\hline
+\vdash A \Rightarrow B
+\end{array}$</p>
+<p>We chose to write these in a form that exhibits the symmetry, though it does not matter whether something is an assumption or a prerequisite truth.  In our <em>modus ponens</em> example above, we actually had</p>
+<p>$\begin{array}{c}
+\hline
+\{A, A \Rightarrow B\} \vdash B
+\end{array}$</p>
+<p>with no prerequisites, only assumptions.</p>
+<p>If $B$ is true assuming $A$, it follows, via <em>hypothetical reasoning</em>, that $A \Rightarrow B$.  We prove an implication by assuming the antecedent and deriving the consequent, reasoning through a hypothetical scenario.  This step may be taken by calling <code>asImplication</code> (or <code>asImpl</code> as an abbreviation) on a <code>KnownTruth</code> object.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will demonstrate <em>hypothetical reasoning</em> be proving the transitivity property of implications, $A \Rightarrow C$ given $A \Rightarrow B$ and $B \Rightarrow C$.   We have already created the <code>A_impl_B</code> object to represent $A \Rightarrow B$ and have proven $\{A,A \Rightarrow B\} \boldsymbol{\vdash} B$.  Let us now create a <code>B_impl_C</code> object to represent $B \Rightarrow C$:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">B_impl_C</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[13]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="B_impl_C">B_impl_C:</strong> <a class="ProveItLink" href="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.html"><img src="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we can prove $C$ given $A$, $A \Rightarrow B$, and $B \Rightarrow C$.  This uses the previously derived proof of $\{A,A \Rightarrow B\} \boldsymbol{\vdash} B$ and extends it by deriving the consequent of $B \Rightarrow C$ under appropriate assumptions.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CviaTransitivity</span> <span class="o">=</span> <span class="n">B_impl_C</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">A_impl_B</span><span class="p">,</span> <span class="n">B_impl_C</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[14]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="CviaTransitivity">CviaTransitivity:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.html"><img src="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We are now ready to apply <em>hypothetical reasoning</em> by calling <code>asImplication</code> on this `KnownTruth**:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_C</span> <span class="o">=</span> <span class="n">CviaTransitivity</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[15]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="A_impl_C">A_impl_C:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/7d41e7f97f628659e5c64b283017b6020177068d0/expr.html"><img src="__pv_it/7d41e7f97f628659e5c64b283017b6020177068d0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/331937d6d92fa85ce5f21643895017d27da16a970/expr.html"><img src="__pv_it/331937d6d92fa85ce5f21643895017d27da16a970/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Below is the full <strong>proof</strong> of this <strong>known truth</strong>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_C</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[16]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>hypothetical reasoning</td><td>1</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/7d41e7f97f628659e5c64b283017b6020177068d0/expr.html"><img src="__pv_it/7d41e7f97f628659e5c64b283017b6020177068d0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/331937d6d92fa85ce5f21643895017d27da16a970/expr.html"><img src="__pv_it/331937d6d92fa85ce5f21643895017d27da16a970/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>1</td><td>modus ponens</td><td>2, 3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.html"><img src="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/4ae5a2d50b488dffa8d8e9314f0e0649390514520/expr.html"><img src="__pv_it/4ae5a2d50b488dffa8d8e9314f0e0649390514520/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.html"><img src="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>modus ponens</td><td>4, 5</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.html"><img src="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>4</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.html"><img src="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that we can take any of the assumption to be the antecedent and then that assumption will be eliminated:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B__impl__C</span> <span class="o">=</span> <span class="n">CviaTransitivity</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">A_impl_B</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[17]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="A_impl_B__impl__C">A_impl_B__impl__C:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/95e2568e368be7aa9ad6aee17d8c4c9d96299f790/expr.html"><img src="__pv_it/95e2568e368be7aa9ad6aee17d8c4c9d96299f790/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/ce99fa4b8f97ba3f5f87d49ca13c66f4639c4dc60/expr.html"><img src="__pv_it/ce99fa4b8f97ba3f5f87d49ca13c66f4639c4dc60/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B__impl__C</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[18]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>hypothetical reasoning</td><td>1</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/95e2568e368be7aa9ad6aee17d8c4c9d96299f790/expr.html"><img src="__pv_it/95e2568e368be7aa9ad6aee17d8c4c9d96299f790/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/ce99fa4b8f97ba3f5f87d49ca13c66f4639c4dc60/expr.html"><img src="__pv_it/ce99fa4b8f97ba3f5f87d49ca13c66f4639c4dc60/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>1</td><td>modus ponens</td><td>2, 3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.html"><img src="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/4ae5a2d50b488dffa8d8e9314f0e0649390514520/expr.html"><img src="__pv_it/4ae5a2d50b488dffa8d8e9314f0e0649390514520/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.html"><img src="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>modus ponens</td><td>4, 5</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.html"><img src="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>4</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.html"><img src="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the previous two demonstrations, where the new antecedent was drawn from the set of assumptions, we can think of <em>hypothetical reasoning</em> as a procedure in which we transform an "implicit" assumption to an "explicit" antecedent.  Similarly, <em>modus ponens</em> may be used to transform an "explicit" antecedent to an "implicit" assumption.  What is the difference between these two different forms of assumption/antecedent?  Why do we need both forms?  The explicit form is necessary because the implicit form cannot be nested.  For example, one could not precisely express $(A \Rightarrow C) \land (B \Rightarrow C) \Rightarrow [(A \lor B) \Rightarrow C]$ with assumptions alone.  The implicit form is also very important.  The implicit form (with assumptions) is extremely convenient, and necessary in the <strong>Prove-It</strong> framework, for accessing the consequent part of an implication directly and applying logical deduction that arise from that consequent (e.g., consider the role of $B$ as a consequent of $A \Rightarrow B$ in the above examples).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The new antecedent does not need to be one of the pre-existing assumptions, however.  After all, a <strong>KnownTruth</strong> is just as valid when extra assumptions are added (the requirements are simply over-complete).  For example,</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X_impl_C</span> <span class="o">=</span> <span class="n">CviaTransitivity</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[19]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="X_impl_C">X_impl_C:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.html"><img src="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/a6f1bf5c2ec915cd8bbb2edaffebc11a41a7864c0/expr.html"><img src="__pv_it/a6f1bf5c2ec915cd8bbb2edaffebc11a41a7864c0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X_impl_C</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[20]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>hypothetical reasoning</td><td>1</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.html"><img src="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/a6f1bf5c2ec915cd8bbb2edaffebc11a41a7864c0/expr.html"><img src="__pv_it/a6f1bf5c2ec915cd8bbb2edaffebc11a41a7864c0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>1</td><td>modus ponens</td><td>2, 3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.html"><img src="__pv_it/652eca88f9f296bcc6067327a71f5fb01d19fa570/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/4ae5a2d50b488dffa8d8e9314f0e0649390514520/expr.html"><img src="__pv_it/4ae5a2d50b488dffa8d8e9314f0e0649390514520/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.html"><img src="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>modus ponens</td><td>4, 5</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.html"><img src="__pv_it/60d37329e7d80ee80309a0873432cf950c8570af0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>4</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.html"><img src="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Automation-regarding-Implies-objects">Automation regarding <code>Implies</code> objects<a class="anchor-link" href="#Automation-regarding-Implies-objects">&#182;</a></h2><p>We will talk more generally about automation in the <a href="tutorial08_automation.ipynb">automation</a> chapter, but in this section we will get a preview of that as we look at automation specific to <strong>implications</strong>.</p>
+<p>It is not always necessary to call the <code>deriveConsequent</code> method directly.  In fact, the <code>deriveConsequent</code> method is called automatically as a "side-effect" whenever a <strong>known truth</strong> for an <code>Implies</code> <strong>expression</strong> is created.  In the example below, a <strong>known truth</strong> for $P \Rightarrow Q$ is created via proof-by-assumption which then triggers $Q$ to be derived as a consequent, adding the extra assumption for the antecedent $P$.  Then, a proof for $Q$, under the assumptions of $P \Rightarrow Q$ and $P$, is automatically generated and available upon request:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">S</span>
+<span class="n">Q</span><span class="o">.</span><span class="n">prove</span><span class="p">([</span><span class="n">P</span><span class="p">,</span> <span class="n">Implies</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[21]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/4414f3dd1e27046cb1369d02904858fcd357f5890/expr.html"><img src="__pv_it/4414f3dd1e27046cb1369d02904858fcd357f5890/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/98124f92e6e1fc3772af50ac63eaa1f5624776f20/expr.html"><img src="../packages/proveit/__pv_it/98124f92e6e1fc3772af50ac63eaa1f5624776f20/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This can be particularly useful when the request is made via some other automation (rather than the manual <code>prove</code> request that was demonstrated in the cell above).  This automation is enabled via a <code>sideEffects</code> method in the <code>Implies</code> class which yields <code>deriveConsequent</code> as a method that should be called when an <code>Implies</code> object is created.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">Implies</span><span class="o">.</span><span class="n">sideEffects</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Help on function sideEffects in module proveit.logic.boolean.implication.implies:
+
+sideEffects(self, knownTruth)
+    Yield the TransitiveRelation side-effects (which also records knownLeftSides
+    and knownRightSides).  Also derive the consequent as a side-effect.
+    As a special case, if the consequent is FALSE, do deriveViaContradiction.
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that there are several things that may be attempted as automation here, not just <code>deriveConsequent</code>.  In general, the <code>sideEffects</code> method of an <strong>Expression</strong> is called, if it exists, whenever a <strong>KnownTruth</strong> for that <strong>Expression</strong> is created.  The <strong>KnownTruth</strong> object is passed to this method and the method should yield methods that should be called for deriving desired side-effects.  This enables automation for a variety of <strong>Expression</strong> types, not just <code>Implies</code> objects.  Another way that automation may be performed is by implementing a <code>conclude</code> method which may attempt to automatically prove a particular type of expression under a given set of assumptions:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">Implies</span><span class="o">.</span><span class="n">conclude</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Help on function conclude in module proveit.logic.boolean.implication.implies:
+
+conclude(self, assumptions)
+    Try to automatically conclude this implication by reducing its operands
+    to true/false, or by doing a &#34;transitivity&#34; search amongst known true implications
+    whose assumptions are covered by the given assumptions.
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The following example of automation relies on the <code>sideEffects</code> method to populate a dictionary of <strong>KnownTruth</strong> implications and also on <code>conclude</code> to perform a search over these implications to find a path to a conclusion from a hypothesis using intermediate implications via transitivity relations (from $A \Rightarrow B$ and $B \Rightarrow C$, we can obtain $A \Rightarrow C$, as we proved in the previous section).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">P_impl_S</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">prove</span><span class="p">([</span><span class="n">Implies</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">S</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[24]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="P_impl_S">P_impl_S:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/22918a9d2ff3f788e0a2367306e352687edfdeb60/expr.html"><img src="__pv_it/22918a9d2ff3f788e0a2367306e352687edfdeb60/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/54813396390b8dda31c5526b3a23fcb30c05ab830/expr.html"><img src="__pv_it/54813396390b8dda31c5526b3a23fcb30c05ab830/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will display the proof for the above <strong>known truth</strong> that was proven via automation, but it relies upon invoking a theorem and applying <em>specialization</em> which will be discussed in detail in later tutorial chapters.  Consider this to be a sneak peak.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">P_impl_S</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[25]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>specialization</td><td>3, 1, 2</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/22918a9d2ff3f788e0a2367306e352687edfdeb60/expr.html"><img src="__pv_it/22918a9d2ff3f788e0a2367306e352687edfdeb60/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/54813396390b8dda31c5526b3a23fcb30c05ab830/expr.html"><img src="__pv_it/54813396390b8dda31c5526b3a23fcb30c05ab830/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/6369c6c8083c513ca7161ace249642d040f9327d0/expr.html"><img src="../packages/proveit/__pv_it/6369c6c8083c513ca7161ace249642d040f9327d0/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/e24df48bc297bbcf3538a62f5b4f635a392abfce0/expr.html"><img src="../packages/proveit/__pv_it/e24df48bc297bbcf3538a62f5b4f635a392abfce0/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/abeee18594afe51bfb1be95d9591fbba24ac53f30/expr.html"><img src="../packages/proveit/__pv_it/abeee18594afe51bfb1be95d9591fbba24ac53f30/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>1</td><td>specialization</td><td>3, 4, 5</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/b5c97e0d5ec8020b62d0e8756c894ff667aeb3650/expr.html"><img src="__pv_it/b5c97e0d5ec8020b62d0e8756c894ff667aeb3650/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/ba868b623e40178b3cab0e88847bb3c8abc799210/expr.html"><img src="__pv_it/ba868b623e40178b3cab0e88847bb3c8abc799210/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/6369c6c8083c513ca7161ace249642d040f9327d0/expr.html"><img src="../packages/proveit/__pv_it/6369c6c8083c513ca7161ace249642d040f9327d0/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/98124f92e6e1fc3772af50ac63eaa1f5624776f20/expr.html"><img src="../packages/proveit/__pv_it/98124f92e6e1fc3772af50ac63eaa1f5624776f20/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/e24df48bc297bbcf3538a62f5b4f635a392abfce0/expr.html"><img src="../packages/proveit/__pv_it/e24df48bc297bbcf3538a62f5b4f635a392abfce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>2</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/865e8fb8be51631b85dbf421af6769ef70cca9150/expr.html"><img src="__pv_it/865e8fb8be51631b85dbf421af6769ef70cca9150/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/1d25e0fab674756b8022481c598aed1c258ea8e50/expr.html"><img src="__pv_it/1d25e0fab674756b8022481c598aed1c258ea8e50/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>theorem</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/logic/boolean/implication/__pv_it/58354b12dbd32d4ac7add309e5c18982ccfedc6a0/expr.html"><img src="../packages/proveit/logic/boolean/implication/__pv_it/58354b12dbd32d4ac7add309e5c18982ccfedc6a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../packages/proveit/logic/boolean/implication/_proofs_/implicationTransitivity.html">proveit.logic.boolean.implication.implicationTransitivity</a></td></tr><tr><td>4</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/63031704f927ce631fed086823e41428213bbb1d0/expr.html"><img src="__pv_it/63031704f927ce631fed086823e41428213bbb1d0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/6391a272b0e3dd71e7bab66e79cde233b22580c30/expr.html"><img src="__pv_it/6391a272b0e3dd71e7bab66e79cde233b22580c30/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/efccbf2572eba033757a05691eff79a7ff47c81a0/expr.html"><img src="__pv_it/efccbf2572eba033757a05691eff79a7ff47c81a0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/9f5a88a40609f2ce3beb8b43a7e4f27d5315d8230/expr.html"><img src="__pv_it/9f5a88a40609f2ce3beb8b43a7e4f27d5315d8230/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can disable this particular proof and obtain an alternate proof via automation as well.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">P_impl_S</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note, below, that we do not need to supply the assumptions because <code>P_impl_S</code> is a <code>KnownTruth</code> object that automatically includes its own assumptions.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">P_impl_S</span><span class="o">.</span><span class="n">prove</span><span class="p">()</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[27]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>hypothetical reasoning</td><td>1</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/22918a9d2ff3f788e0a2367306e352687edfdeb60/expr.html"><img src="__pv_it/22918a9d2ff3f788e0a2367306e352687edfdeb60/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/54813396390b8dda31c5526b3a23fcb30c05ab830/expr.html"><img src="__pv_it/54813396390b8dda31c5526b3a23fcb30c05ab830/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>1</td><td>modus ponens</td><td>2, 3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/1c75aed0deac9f6c687ff1a57bf16a86b4b163370/expr.html"><img src="__pv_it/1c75aed0deac9f6c687ff1a57bf16a86b4b163370/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/abeee18594afe51bfb1be95d9591fbba24ac53f30/expr.html"><img src="../packages/proveit/__pv_it/abeee18594afe51bfb1be95d9591fbba24ac53f30/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/865e8fb8be51631b85dbf421af6769ef70cca9150/expr.html"><img src="__pv_it/865e8fb8be51631b85dbf421af6769ef70cca9150/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/1d25e0fab674756b8022481c598aed1c258ea8e50/expr.html"><img src="__pv_it/1d25e0fab674756b8022481c598aed1c258ea8e50/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>modus ponens</td><td>4, 5</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d88de5c240a04a98c3270237cf40b63aa8c551890/expr.html"><img src="__pv_it/d88de5c240a04a98c3270237cf40b63aa8c551890/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/e24df48bc297bbcf3538a62f5b4f635a392abfce0/expr.html"><img src="../packages/proveit/__pv_it/e24df48bc297bbcf3538a62f5b4f635a392abfce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>4</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/efccbf2572eba033757a05691eff79a7ff47c81a0/expr.html"><img src="__pv_it/efccbf2572eba033757a05691eff79a7ff47c81a0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/9f5a88a40609f2ce3beb8b43a7e4f27d5315d8230/expr.html"><img src="__pv_it/9f5a88a40609f2ce3beb8b43a7e4f27d5315d8230/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>modus ponens</td><td>6, 7</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/6337259b9f0d67d87a1cdf0439444f98fe0902390/expr.html"><img src="__pv_it/6337259b9f0d67d87a1cdf0439444f98fe0902390/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/98124f92e6e1fc3772af50ac63eaa1f5624776f20/expr.html"><img src="../packages/proveit/__pv_it/98124f92e6e1fc3772af50ac63eaa1f5624776f20/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>6</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/63031704f927ce631fed086823e41428213bbb1d0/expr.html"><img src="__pv_it/63031704f927ce631fed086823e41428213bbb1d0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/6391a272b0e3dd71e7bab66e79cde233b22580c30/expr.html"><img src="__pv_it/6391a272b0e3dd71e7bab66e79cde233b22580c30/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>7</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/4a455e396ba375ed966209be89aba61d84cf85ba0/expr.html"><img src="__pv_it/4a455e396ba375ed966209be89aba61d84cf85ba0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/6369c6c8083c513ca7161ace249642d040f9327d0/expr.html"><img src="../packages/proveit/__pv_it/6369c6c8083c513ca7161ace249642d040f9327d0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is a slightly longer proof but it demonstrates that <em>hypothothetical reasoning</em> can also be automated.  That is, the <code>Implies.conclude</code> method will attempt to apply <code>asImplication</code> automatically if other strategies fail (like the previous transitivity approach which fails because that proof was disabled).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Disabling/Enabling-Automation">Disabling/Enabling Automation<a class="anchor-link" href="#Disabling/Enabling-Automation">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If desired, for whatever reason, automation (via <code>sideEffects</code> and <code>conclude</code>) may be disabled by setting the <code>automation</code> flag of the <code>defaults</code> object to <code>False</code>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">defaults</span>
+<span class="n">defaults</span><span class="o">.</span><span class="n">automation</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[28]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="defaults.automation">defaults.automation:</strong> False<br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We now attempt the automated proof through transitivity relations that we performed before (but simply in the reverse direction to make it different, otherwise it would remember the solution from before).  It will fail because automation is disabled.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ProofFailure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Implies</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="n">prove</span><span class="p">([</span><span class="n">Implies</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">R</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">Q</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">P</span><span class="p">)])</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ProofFailure error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ProofFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expected error:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Expected error: Unable to prove S =&gt; P assuming {S =&gt; R, R =&gt; Q, Q =&gt; P}: No pre-existing proof
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It may be re-enabled by setting this flag back to <code>True</code>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">defaults</span><span class="o">.</span><span class="n">automation</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[30]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="defaults.automation">defaults.automation:</strong> True<br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now the proof will go through via automation:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Implies</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="n">prove</span><span class="p">([</span><span class="n">Implies</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">R</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">Q</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">P</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[31]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/b9edc1d1844fbbd0b468bfb2d49802ed3e2322d60/expr.html"><img src="__pv_it/b9edc1d1844fbbd0b468bfb2d49802ed3e2322d60/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/4bd3ff294328e971ff1a67d56bbb3eb1ea6a72010/expr.html"><img src="__pv_it/4bd3ff294328e971ff1a67d56bbb3eb1ea6a72010/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In addition to changing <code>defaults.automation</code>, it is also possible to disable automation for a particular instance when calling <code>prove</code>.  Basically, this just checks if something has been proven already (or is proven by the assumptions or their automatic side-effects) and raises a <code>ProofFailure</code> otherwise.  This can be useful in other automation to quickly check a possible proof pathway without potentially wasting the effort to commit to that pathway.</p>
+<p>For example:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Implies</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span><span class="o">.</span><span class="n">prove</span><span class="p">([</span><span class="n">Implies</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">)],</span> <span class="n">automation</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ProofFailure error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ProofFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expected error:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Expected error: Unable to prove X =&gt; Z assuming {X =&gt; Y, Y =&gt; Z}: No pre-existing proof
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>But using the default <code>automation=True</code>, we can automatically prove this implication via transitivity (just as we saw above using different labels).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X_impl_Z</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span><span class="o">.</span><span class="n">prove</span><span class="p">([</span><span class="n">Implies</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">),</span> <span class="n">Implies</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[33]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="X_impl_Z">X_impl_Z:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d5585e20503b90284a5c6b4c20cd49456c0fcc030/expr.html"><img src="__pv_it/d5585e20503b90284a5c6b4c20cd49456c0fcc030/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/f367be7c9affe943e3de15b4482a996e3f14fd120/expr.html"><img src="__pv_it/f367be7c9affe943e3de15b4482a996e3f14fd120/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X_impl_Z</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[34]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>specialization</td><td>1, 2, 3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d5585e20503b90284a5c6b4c20cd49456c0fcc030/expr.html"><img src="__pv_it/d5585e20503b90284a5c6b4c20cd49456c0fcc030/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/f367be7c9affe943e3de15b4482a996e3f14fd120/expr.html"><img src="__pv_it/f367be7c9affe943e3de15b4482a996e3f14fd120/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/66cd610ba99eba68f315bbcf220cc988223124550/expr.html"><img src="../packages/proveit/__pv_it/66cd610ba99eba68f315bbcf220cc988223124550/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/d787b05c0222bf7633141c210c6c9992f7bcfcbc0/expr.html"><img src="../packages/proveit/__pv_it/d787b05c0222bf7633141c210c6c9992f7bcfcbc0/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/d36dfc8761400c6960a2e78b88a892781372a1a10/expr.html"><img src="../packages/proveit/__pv_it/d36dfc8761400c6960a2e78b88a892781372a1a10/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>1</td><td>theorem</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/logic/boolean/implication/__pv_it/58354b12dbd32d4ac7add309e5c18982ccfedc6a0/expr.html"><img src="../packages/proveit/logic/boolean/implication/__pv_it/58354b12dbd32d4ac7add309e5c18982ccfedc6a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../packages/proveit/logic/boolean/implication/_proofs_/implicationTransitivity.html">proveit.logic.boolean.implication.implicationTransitivity</a></td></tr><tr><td>2</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/ce8ab26fc2da2d90ae646a77ecfaef3cf1e9a4960/expr.html"><img src="__pv_it/ce8ab26fc2da2d90ae646a77ecfaef3cf1e9a4960/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/bcf1eb32cbd33f92b98d7e3882053351f223e6fe0/expr.html"><img src="__pv_it/bcf1eb32cbd33f92b98d7e3882053351f223e6fe0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/78cef14e17d02ce55a04152492946a52517210220/expr.html"><img src="__pv_it/78cef14e17d02ce55a04152492946a52517210220/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/edc48910962c50f92a5db8a4b01562d6435c23960/expr.html"><img src="__pv_it/edc48910962c50f92a5db8a4b01562d6435c23960/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">end</span> implication
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Next-chapter:-Relabeling">Next chapter: <a href="tutorial04_relabeling.ipynb">Relabeling</a><a class="anchor-link" href="#Next-chapter:-Relabeling">&#182;</a></h1><h2 id="Table-of-Contents"><a href="tutorial00_introduction.ipynb#contents">Table of Contents</a><a class="anchor-link" href="#Table-of-Contents">&#182;</a></h2>
+</div>
+</div>
+</div>
+    </div>
+  </div>
+<footer>
+  <p>These web pages were generated on 2019-07-14 by <a href="https://github.com/PyProveIt/Prove-It">Prove-It</a> Beta Version 0.3, licensed under the GNU Public License by Sandia Corporation.</p>
+  <p>Presented proofs are not absolutely guaranteed.  For assurance, it is important to check the structure 
+  of the statement being proven, independently verify the derivation steps, track dependencies, and ensure that 
+  employed axioms are valid and properly structured.  Inconsistencies may exist, unknowingly, in this system.
+  </p>
+  <p>
+  This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research, under the Quantum Computing Application Teams program. Sandia National Labs is managed and operated by National Technology and Engineering Solutions of Sandia, LLC, a subsidiary of Honeywell International, Inc., for the U.S. Dept. of Energy's NNSA under contract DE-NA0003525. The views expressed above do not necessarily represent the views of the DOE or the U.S. Government.
+  </p>
+  <br>
+  <p>Please send questions/comments to: <a href="mailto:wwitzel@sandia.gov">
+  wwitzel@sandia.gov</a>.</p>
+</footer> 
+</body>
+
+ 
+
+
+</html>

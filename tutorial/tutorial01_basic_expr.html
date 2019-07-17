@@ -1,0 +1,3156 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" />
+<title>Chapter 1. Basic Expressions</title>
+
+<style type="text/css">
+/* Overrides of notebook CSS for static HTML export */
+body {
+  overflow: visible;
+  padding: 8px;
+}
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  } 
+  div.output_wrapper { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+  div.output { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+}
+</style>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="notebook.css">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+</script></head>
+<body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
+    <a href="../index.html"><img src="../pv_it.png" alt="logo" style="width:50px;float:left;position:absolute"></a> 
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Chapter-1.-Basic-Expressions">Chapter 1. Basic Expressions<a class="anchor-link" href="#Chapter-1.-Basic-Expressions">&#182;</a></h1><p>Expressions in <strong>Prove-It</strong> are fundamental and versatile.  In order to prove some statement to be true, you must be able to express the statement that you want to prove, and express each axiom and each theorem that is used to construct the proof as well as intermediate statements along the way.<br>
+<strong>Expressions</strong> form <strong>known truths</strong> that are used in the derivation steps of a <strong>proof</strong> and will be discussed later.
+An expression is a tree-like data structure (technically a directed acyclic graph, DAG, since there may be multiple instances of the same sub-expression).  As a Python object, its base class is <code>proveit._core_.expression.expr.Expression</code> (also aliased as <code>proveit.Expression</code> via "<code>from ... import ...</code>" Python statements within <code>__init__.py</code> files):</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="o">%</span><span class="k">begin</span> basic_expressions
+<span class="n">Expression</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[1]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>proveit._core_.expression.expr.Expression</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>An <code>Expression</code> object must be one of the "core" <code>Expression</code> classes listed below that is each derived from <code>proveit._core_.expression.expr.Expression</code>.  The list is reproduced from our <a class="ProveItLink" href="../packages/brief_guide.html">brief guide</a> but more details and some code examples are provided below in this tutorial.  The "basic" types of expressions that are covered in this chapter are:</p>
+<ul>
+<li><a href="#Variable">`Variable`</a>: A label that is interchangeable (as long as it is kept distinct from other labels) with no intrinsic meaning.  It is usually represented by a single letter but can have any representation.</li>
+<li><a href="#Literal">`Literal`</a>: A label that is not interchangeable and has an intrinsic meaning.  Specific operators ($\lnot, \land, +, \times$, etc.) and specific irreducibe values ($\top, \bot, 0, 5$, etc.) are all <code>Literal</code>s.  Furthermore, a problem-story <code>Variable</code> in a particular <strong>context</strong>, representing some unknown but particular value, should also be a <code>Literal</code> (e.g., "Ann has $a$ apples...").</li>
+<li><a href="#Operation">`Operation`</a>: The application of <em>operator(s)</em> on <em>operand(s)</em>.  For example, $0 + 5 + 8$ and $1 &lt; a \leq b &lt; 3$ are examples of <em>operation</em> expressions.  The <strong>Prove-It</strong> library defines many <em>types</em> derived from the <em>operation</em> type (e.g., for each specific operation), but the <a href="#proof_deriv">derivation rules</a> only need to know that these are <em>operations</em>.</li>
+<li><a href="#Lambda">`Lambda`</a>: A mapping defined by <em>parameter</em> <code>Variable</code>s transforming to some <em>body</em> <code>Expression</code> but only when the <em>parameter(s)</em> meet certain <em>condition(s)</em>.  For example, $(x, y, z) \mapsto x+y/z~|~x \in \mathbb{R}, y \in \mathbb{R}, z \in \mathbb{R}, z \neq 0$ is a conditional <strong>lambda</strong> that converts three real numbers $x, y, z$ to $x + y/z$ as long as $z$ is not zero.  Note that a <code>Lambda</code> introduces <code>Variables</code> into a new scope via the <em>parameters</em>.  These <em>parameter</em> <code>Variable</code>s are said to be <em>bound</em> in this new scope; occurrences outside this scope are not deemed to be the same thing. There is a special category of <code>Operation</code> types called <code>OperationOverInstances</code> that are essentially functionals acting on a <code>Lambda</code> operand.  $\forall$, $\exists$, $\sum$, and $\prod$ are examples of <code>OperationOverInstances</code>.  For example, $\forall_{x~|~Q(x)} P(x)$ is an expression that translates to "$P(x)$ is true for all values of $x$ for which $Q(x)$ is also true".  Internally, this is represented as an $\forall$ operator acting on the conditional <code>Lambda</code> map $x \mapsto P(x)~|~Q(x)$.</li>
+<li><a href="#ExprList">`ExprList`</a>: A list of <code>Expression</code>s that is used, for example, when there are multiple <em>operators</em> or <em>operands</em> of an <code>Operation</code> or multiple <em>parameters</em> of a <code>Lambda</code>.</li>
+<li><a href="#NamedExprs">`NamedExprs`</a>: A mapping from keyword strings to <code>Expression</code>s.  This can be used to prevent ambiguity of an expression's internal representation.</li>
+</ul>
+<p>Advanced expressions covered in a <a href="tutorial10_advanced_expr.ipynb">later chapter</a>:</p>
+<ul>
+<li><a href="tutorial10_advanced_expr.ipynb#ExprTensor">`ExprTensor`</a>: A multi-dimensional (e.g., two-dimensional) array of <code>Expression</code>s. This can be used, for example, to represent a quantum circuit which is a two-dimensional graphical representation of a sequence of quantum operations.  A 2-D representation of a matrix is a more basic example.  More work is required to properly implement and test the <em>ExprTensor</em> class.</li>
+<li><a href="tutorial10_advanced_expr.ipynb#Indexed">`Indexed`</a>: A particular indexed element of a <code>Variable</code> where the <code>Variable</code> is intended to serve as a placeholder for an <code>ExprList</code> or <code>ExprTensor</code>.  It has a <em>base</em> which determines the indexing offset, typically $0$ or $1$.  For example, $x_5$ represents the fifth or sixth element of $x$ in <em>base</em> $1$ or $0$ respectively.  The <em>base</em> is typically not displayed and must be inferred by the context, though it is explicitly revealed in the <a href="#expr_info">expression information page</a>.  An <code>Indexed</code> expression is typically contained within an <code>Iter</code> (described next).</li>
+<li><a href="tutorial10_advanced_expr.ipynb#Iter">`Iter`</a>: Represents an iteration of a <em>parameter</em> going from a <em>start</em> to an <em>end</em> in successive unit increments ($+1$).  For example, $x_1 +~\ldots~+ x_n$ contains an <code>Iter</code> of <code>Indexed</code> <code>Variable</code>.  If we take $n$ to be $3$, this would expand to $x_1 + x_2 + x_3$.  An <code>Iter</code> has a <em>lambda map</em>, <em>start index(indices)</em>, and <em>end index(indices)</em>.  In our example, the <code>Iter</code> $x_1,~\ldots,x_n$, is the <em>operand</em> of an <code>proveit.number.addition.Add</code> <code>Operation</code>.  The <em>lambda map</em>, <em>start index</em> and <em>end index</em> of the <em>iteration</em> are $i \mapsto x_i$, $1$, and $n$, respectively.</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Developers and users may derive new classes from core <code>Expression</code> classes (<code>Literal</code> and <code>Operation</code> classes in <em> <a href="tutorial10_advanced_expr.ipynb#ExprTensor">`ExprTensor`</a>: A multi-dimensional (e.g., two-dimensional) array of <code>Expression</code>s. This can be used, for example, to represent a quantum circuit which is a two-dimensional graphical representation of a sequence of quantum operations.  A 2-D representation of a matrix is a more basic example.  More work is required to properly implement and test the </em>ExprTensor* class.particular) to make their own <code>Expression</code> classes that have special formatting rules for displaying the <strong>expression</strong> and methods for manipulating and utilizing the expression (i.e., applying theorems or axioms as will be discussed in later tutorial chapters).  Ideally, the formatted should be in direct correspondence with the structure of the <code>Expression</code> as a true reflection of the internal representation, but there is no enforcement mechanism to ensure that this is the case.  Users are advised to inspect the fully explicit expression DAGs of important axioms and theorems (or rely on crowdsource checking).  Conveniently, clicking on any <strong>expression</strong> rendered as LaTeX will link to a notebook that, when executed, will reveal this internal structure.  (Alternatively, the <code>exprInfo()</code> method may be called).</p>
+<p>The remainder of this tutorial chapter will show examples and discuss details of the different core <code>Expression</code> classes.</p>
+<p>As we discuss these different core types we will discuss the instances when <strong>expressions</strong> are considered to be the same or different.  This is important because it corresponds to whether or not an <strong>expression</strong> is the same as one that has been proven to be a true statement (<strong>known truth</strong>).</p>
+<p>We will also discuss <em>expression substitution/relabeling</em> as we go through the different cases.  The following are related but distinct manipulations in <strong>Prove-It</strong>:</p>
+<ul>
+<li><em>Expression substutition</em>: creating a new <strong>expression</strong> from an existing <strong>expression</strong> by swapping one or more sub-expression(s) for other sub-expression(s) by using the <code>substituted</code> method.  This creates a new <code>Expression</code> but has nothing to do, intrinsically, with proving statements.</li>
+<li><em>Expression relabeling</em>: a restricted version of <em>expression substitution</em> in which any <code>Variable</code> may be relabeled only with another <code>Variable</code> by using the <code>relabeled</code> method.</li>
+<li><em>Specialization</em> derivation step: deriving a statement of the form $P(y)$ from a statement of the form $\forall_x P(x)$.  Details of this will be discussed in a later tutorial chapter, but this manipulation uses <em>expression substitution</em> in generating $P(y)$.  However, specific rules and limitations apply to <em>specialization</em> that may not apply to <em>expression substitution</em> to ensure that the derivation is sound.  <em>Specialization</em> specifically involves statements (<strong>known truths</strong>) with the $\forall$ quantifier (Forall).</li>
+<li><em>Relabeling</em> derivation step: deriving a statement (known truth) from another statement which differs only in its <code>Variable</code>s.  For example, from $\forall_x P(x)$, we could use <em>relabeling</em> to derive $\forall_y P(y)$.</li>
+<li><em>Equality substitution</em>: using the <code>substitution</code> axiom of <code>proveit.logic.equality</code> to prove that $f(x) = f(y)$ given $x = y$.  This uses <em>specialization</em> of the <code>substitution</code> axiom which state $\forall_{f, x, y~|~x=y}~(f(x) = f(y))$.  This specifically involves statements (<strong>known truths</strong>) with the <code>proveit.logic.equality.equals._operator_</code> <strong>Literal</strong> (the <code>=</code> sign). This will be discussed in a later tutorial chapter.</li>
+</ul>
+<p>The focus here will be <em>expression substitution/relabeling</em> with some mention of the additional restrictions applicable to the <em>specialization/relabeling</em> derivation steps that will be discussed in detail in later tutorial chapters.  It is important to understand the distinction of these types of manipulations.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Labels-(Variables-and-Literals)"><a name="#Label" />Labels (Variables and Literals)<a class="anchor-link" href="#Labels-(Variables-and-Literals)">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Label</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>Variable</code> and <code>Literal</code> classes both derive from <code>Label</code>.  A <code>Label</code> is created with a string and LaTeX format to determine how it is displayed.  In a Jupyter notebook, the LaTeX is rendered and presented in the output:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tri</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">stringFormat</span><span class="o">=</span><span class="s1">&#39;triangle&#39;</span><span class="p">,</span> <span class="n">latexFormat</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\triangle&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[3]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="tri">tri:</strong> <a class="ProveItLink" href="__pv_it/b8bc794ff7aade9592ba459dc1fb9c2587bb1feb0/expr.html"><img src="__pv_it/b8bc794ff7aade9592ba459dc1fb9c2587bb1feb0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>After importing anything from <code>proveit</code> in a Jupyter notebook, whenever assignments are made at the end of an input cell the output shows the name of the assigned Python variable (not to be confused with a <strong>Prove-It</strong> <em>Variable</em>) followed by ':' and its rendered value.  In the above input, we have assigned <code>tri</code> to a <code>Label</code> object we have created which renders as a triangle shape.  For convenience, this Python variable name and shape appear in the output without any additional code.  The string format is presented when the object is converted to a string and is a useful alternate representation (used, for example, in error messages that are displayed as strings).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">str</span><span class="p">(</span><span class="n">tri</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[4]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;triangle&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The breakdown of an <strong>expression</strong> into its DAG structure is displayed by calling <code>exprInfo()</code>.  Clicking on the <strong>expression</strong> is also a way to view this information, linking to a page that shows a canonical way to build the <strong>expression</strong> and calling <code>exprInfo()</code> on that built <strong>expression</strong>.  Here we see that the <code>tri</code> is a <code>Label</code> with no sub-expressions.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tri</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span> <span class="c1"># the expressions and sub-expressions are numbered with the top level being zero.</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[5]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Label</td><td></td><td><a class="ProveItLink" href="__pv_it/b8bc794ff7aade9592ba459dc1fb9c2587bb1feb0/expr.html"><img src="__pv_it/b8bc794ff7aade9592ba459dc1fb9c2587bb1feb0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>Label</code> was not one of the core <strong>expression</strong> types listed above because it is not intended to be used except as the base class of <code>Variable</code> and <code>Literal</code>.  Notwithstanding, <code>Label</code> is displayed as the core type.
+Two Label's are regarded to be the same expression iff both formats, and the class, are the same:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">tri</span> <span class="o">==</span> <span class="n">Label</span><span class="p">(</span><span class="s1">&#39;triangle&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\triangle&#39;</span><span class="p">)</span> <span class="c1"># equal when both formats are the same</span>
+<span class="k">assert</span> <span class="n">tri</span> <span class="o">!=</span> <span class="n">Label</span><span class="p">(</span><span class="s1">&#39;tri&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\triangle&#39;</span><span class="p">)</span> <span class="c1"># not equal when either is different</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's make another label to test out substituted and relabeled methods:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sq</span> <span class="o">=</span>  <span class="n">Label</span><span class="p">(</span><span class="n">stringFormat</span><span class="o">=</span><span class="s1">&#39;square&#39;</span><span class="p">,</span> <span class="n">latexFormat</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\Box&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[7]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="sq">sq:</strong> <a class="ProveItLink" href="__pv_it/8adaa68e2d53f0c6257301971714ca93abaf43930/expr.html"><img src="__pv_it/8adaa68e2d53f0c6257301971714ca93abaf43930/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Using <em>expression substitution</em>, we can change one <code>Label</code> into another or any other <code>Expression</code>.  We'll see that <em>specialize</em> is more restrictive; only applicable to <code>Variable</code>s and not any <code>Label</code>, but for <em>expression substition</em> this is fine.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tri</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">tri</span><span class="p">:</span><span class="n">sq</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[8]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/8adaa68e2d53f0c6257301971714ca93abaf43930/expr.html"><img src="__pv_it/8adaa68e2d53f0c6257301971714ca93abaf43930/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Variable"><a href="#Variable" />Variable<a class="anchor-link" href="#Variable">&#182;</a></h1><p>A <code>Variable</code> is an interchangeable <a href="#Label">Label</a> with no formal, contextual meaning.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Variable</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span> <span class="c1"># the string and latex formats are the same by default</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[9]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="x">x:</strong> <a class="ProveItLink" href="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">omega</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">stringFormat</span><span class="o">=</span><span class="s1">&#39;omega&#39;</span><span class="p">,</span> <span class="n">latexFormat</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\omega&#39;</span><span class="p">)</span> <span class="c1"># different string and latex format</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[10]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="omega">omega:</strong> <a class="ProveItLink" href="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.html"><img src="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Convenient <code>Variable</code>s and other <code>Expression</code>s are accessible from <code>_common_.py</code> modules (generated from <code>_common_.ipynb</code> notebooks).  That is, <code>_common_.py</code> modules hold common expressions.  For example, from <a class="ProveItLink" href="../packages/proveit/_common_.html">proveit.common</a> we can import the following.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">alpha</span>
+<span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ExprList</span>
+<span class="n">ExprList</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[11]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/e08431f5cebb9f04d3a14687a6117020e15c39f10/expr.html"><img src="__pv_it/e08431f5cebb9f04d3a14687a6117020e15c39f10/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We used an <a href="#ExprList">ExprList</a> to conveniently render all of these <code>Variable</code>s as one <code>Expression</code>.  Expression information is similar to the <code>Label</code>, but with the different core type and class:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">alpha</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[12]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/965f7d5cdf9cb513de3a5460206eae877dc8125c0/expr.html"><img src="../packages/proveit/__pv_it/965f7d5cdf9cb513de3a5460206eae877dc8125c0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Just as we saw for the generic <code>Label</code> <code>Expression</code>s, we can use <em>expression substitution</em> to exchange one <code>Variable</code> for another or any other <code>Expression</code> or <em>expression relabeling</em> to exchange one <code>Variable</code> for another <code>Variable</code>.  Furthermore, we will see in a later tutorial chapter that <code>Variable</code>s have special properties with respect to <em>specialization</em> because they are defined as interchangeable labels.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">alpha</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">alpha</span><span class="p">:</span><span class="n">sq</span><span class="p">})</span> <span class="c1"># we can substitute a Variable for any other Expression</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[13]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/8adaa68e2d53f0c6257301971714ca93abaf43930/expr.html"><img src="__pv_it/8adaa68e2d53f0c6257301971714ca93abaf43930/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">alpha</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">alpha</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span> <span class="c1"># we can relabel a Variable to another Variable</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[14]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.html"><img src="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ImproperRelabeling</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">alpha</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">alpha</span><span class="p">:</span><span class="n">sq</span><span class="p">})</span> <span class="c1"># we can NOT relabel a Variable to a non-Variable</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ImproperRelabeling error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ImproperRelabeling</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: May only relabel Variable to Variable
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Literal"><a name="#Literal" />Literal<a class="anchor-link" href="#Literal">&#182;</a></h2><p>A <code>Literal</code> is another kind of <a href="#Label">Label</a>.  In contrast to <code>Variable</code>s, <code>Literal</code>s have a formal, contextual meaning.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Literal</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Below are different scenarios in which a <code>Literal</code> could appropriately be used.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Specific-operators">Specific operators<a class="anchor-link" href="#Specific-operators">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">TIMES</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="n">stringFormat</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">latexFormat</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\times&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[17]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="TIMES">TIMES:</strong> <a class="ProveItLink" href="__pv_it/7fa9fd20fee7806a99050bf24ffcbd2251e9b7fe0/expr.html"><img src="__pv_it/7fa9fd20fee7806a99050bf24ffcbd2251e9b7fe0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">FACTORIAL</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[18]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="FACTORIAL">FACTORIAL:</strong> <a class="ProveItLink" href="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.html"><img src="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SUMMATION</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\sum&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[19]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="SUMMATION">SUMMATION:</strong> <a class="ProveItLink" href="__pv_it/5b704e102c6153cce716db994038e7433059b1730/expr.html"><img src="__pv_it/5b704e102c6153cce716db994038e7433059b1730/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will see in the <a href="#Operation">Operation</a> section that the <em>operator</em> of an <code>Operation</code>-derived class should be stored as a Python class variable called <code>_operator_</code>.  We are using module-level Python variable names just for these examples.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Constant-values">Constant values<a class="anchor-link" href="#Constant-values">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">FIVE</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;5&#39;</span><span class="p">)</span> <span class="c1"># Literal constants are also ALL-CAPS</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[20]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="FIVE">FIVE:</strong> <a class="ProveItLink" href="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.html"><img src="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">TRUE</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\top&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[21]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="TRUE">TRUE:</strong> <a class="ProveItLink" href="__pv_it/567fef274ea4a346669c1cb3f9cc1731c13accd50/expr.html"><img src="__pv_it/567fef274ea4a346669c1cb3f9cc1731c13accd50/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">FALSE</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;false&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\bot&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[22]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="FALSE">FALSE:</strong> <a class="ProveItLink" href="__pv_it/ad3fe9d0b017afe72545320c02b720fcc151755f0/expr.html"><img src="__pv_it/ad3fe9d0b017afe72545320c02b720fcc151755f0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This will typically be defined as <strong>common expressions</strong> in the appropriate <strong>context</strong>, to be discussed in a later tutorial.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Contextual-&quot;variables&quot;">Contextual "variables"<a class="anchor-link" href="#Contextual-&quot;variables&quot;">&#182;</a></h3><p>This is appropriate when variables are given a specific meaning within the context of a problem.  For example, consider a math "story problem" where Andrea has $a$ apples and Bill has $b$ bananas.  These are variables in a sense, but here they have contextual meaning so they should be <code>Literal</code>s.  However, suppose one wants to prove a general theorem for any number of Andrea's apples and Bill's bananas.  One may start by using the $a$ and $b$ <code>Literal</code>s for convenience for some contextual "lemmas" (as an aside, though, <strong>Prove-It</strong> does not distinguish between lemmas and theorems), but then demote them to <code>Variable</code>s in order to make a statement of the form $\forall_{a, b} P(a, b)$ (<code>Literal</code>s may not be quantified over).  This is done by using a process called axiom elimination that will be discussed later.  For now, we just note that "variables" with contextual meaning need to be <code>Literal</code>s.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">aLit</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[23]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="aLit">aLit:</strong> <a class="ProveItLink" href="__pv_it/2bb97c217fcb1fb3c3ee70ce478b8849ff22d3950/expr.html"><img src="__pv_it/2bb97c217fcb1fb3c3ee70ce478b8849ff22d3950/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bLit</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[24]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="bLit">bLit:</strong> <a class="ProveItLink" href="__pv_it/1ff8d729167878a0309a8d0ba2bd23282d7fa6770/expr.html"><img src="__pv_it/1ff8d729167878a0309a8d0ba2bd23282d7fa6770/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">aLit</span> <span class="c1"># different because one is a Variable and one is a Literal</span>
+<span class="k">assert</span> <span class="n">a</span> <span class="o">==</span> <span class="n">aLit</span><span class="o">.</span><span class="n">asVariable</span><span class="p">()</span> <span class="c1"># same after converting the Literal to a Variable</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Literal-substitution">Literal substitution<a class="anchor-link" href="#Literal-substitution">&#182;</a></h3><p>It is possible to perform <em>expression substitution</em> on a <code>Literal</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">aLit</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">aLit</span><span class="p">:</span><span class="n">bLit</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[26]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/1ff8d729167878a0309a8d0ba2bd23282d7fa6770/expr.html"><img src="__pv_it/1ff8d729167878a0309a8d0ba2bd23282d7fa6770/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">aLit</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">aLit</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[27]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.html"><img src="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>However, we cannot <em>relabel</em> a <code>Literal</code> since a <strong>literal</strong> is not an interchangeable label.  Furthermore, we will see in a later chapter that <em>specialization</em> is not allowed because you cannot quantify over a <code>Literal</code> like you can a <code>Variable</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">aLit</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">aLit</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span> <span class="c1"># we cannot relabel Literals</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting a TypeError; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR:  relabelMap keys must be Variables
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Literal-contexts">Literal contexts<a class="anchor-link" href="#Literal-contexts">&#182;</a></h3><p>A <code>Literal</code> is distinguished not only by its formatting but also by its <strong>context</strong>.  Axioms and theorems of <strong>Prove-It</strong> are organized via <strong>contexts</strong> which we will discuss later in more detail.  Each <code>Literal</code> belongs to a <strong>context</strong> which is typically the one corresponding to the package (directory) in which it is defined.  This is particularly important for <em>contextual variable</em> types of <code>Literal</code>s that are very <em>context</em>-specific.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">proveit.logic</span> <span class="k">as</span> <span class="nn">logic</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">logic</span><span class="o">.</span><span class="n">TRUE</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[30]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="../packages/proveit/logic/boolean/__pv_it/68a87cc3370287d726c7086ace789e680e4461c30/expr.html"><img src="../packages/proveit/logic/boolean/__pv_it/68a87cc3370287d726c7086ace789e680e4461c30/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><em>If the above output is not the $\top$ symbol when you execute this, you probably need to <a class="ProveItLink" href="tutorial00_introduction.html#build">build or download the Prove-It database</a>.</em></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># When the context is different, they are not the same.</span>
+<span class="n">TRUE</span> <span class="o">==</span> <span class="n">logic</span><span class="o">.</span><span class="n">TRUE</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[31]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>False</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The detailed expression information reveals the differences:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">TRUE</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">(</span><span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[32]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/567fef274ea4a346669c1cb3f9cc1731c13accd50/expr.html"><img src="__pv_it/567fef274ea4a346669c1cb3f9cc1731c13accd50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">logic</span><span class="o">.</span><span class="n">TRUE</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">(</span><span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[33]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/logic/boolean/__pv_it/68a87cc3370287d726c7086ace789e680e4461c30/expr.html"><img src="../packages/proveit/logic/boolean/__pv_it/68a87cc3370287d726c7086ace789e680e4461c30/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>class:</strong> proveit.logic.boolean.booleans.TrueLiteral</td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> proveit.logic.boolean</td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Expressions</strong> are also distinguished by their class (derived from the <em>core type</em>).  In the above example, <code>logic.TRUE</code> is an object of the <code>proveit.logic.boolean.booleans.TrueLiteral</code> class.  <code>logic.TRUE</code> and <code>logic.FALSE</code> have an <code>evalEquality(..)</code> method defined in their respective classes which is convenient method for deriving any of the following: $(\top = \top) = \top$, $(\bot = \bot) = \top$, $(\top = \bot) = \bot$, or $(\bot = \top) = \bot$ (these are proven theorems within <code>proveit.logic</code>).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">logic</span><span class="o">.</span><span class="n">TRUE</span><span class="o">.</span><span class="n">evalEquality</span><span class="p">(</span><span class="n">logic</span><span class="o">.</span><span class="n">FALSE</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[34]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/635413d1dd6bf978ca929368d609ada728787e280/expr.html"><img src="__pv_it/635413d1dd6bf978ca929368d609ada728787e280/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is a sneak preview of a known truth (<strong>KnownTruth</strong> object) that uses the turnstile notation, $\boldsymbol{\vdash}$, to indicate that the expression is a proven statement.  There will be more on this in later tutorial chapters.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Lambda"><a name="Lambda" />Lambda<a class="anchor-link" href="#Lambda">&#182;</a></h1><p>This type of <strong>expression</strong> represents a mathematical mapping or function.  It contains <em>parameter(s)</em> (one or more <code>Variable</code>s and may also include <code>Iteration</code>s of <code>Indexed</code> <code>Variable</code>s that will be discussed in the <a href="tutorial10_advanced_expr.ipynb#Iteration">Iteration</a> section of the <a href="tutorial10_advanced_expr.ipynb">advanced expressions</a> chapter), a <em>body</em> (any <code>Expression</code> that the parameters are to be mapped into), and optional <em>conditions</em> (any <code>Expression</code>s).  The mapping is only defined when the <em>conditions</em> are satisfied (derivable as <strong>known truths</strong>).  Below is an example with a single <em>parameter</em> and no <em>conditions</em>, mapping any input to the $5$ <strong>Literal</strong>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Lambda</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># maps any value to 5</span>
+<span class="n">mapTo5</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">FIVE</span><span class="p">)</span> 
+<span class="n">mapTo5</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[36]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/ee0040d5dfe477769750d3eee2534a9fec12dcae0/expr.html"><img src="__pv_it/ee0040d5dfe477769750d3eee2534a9fec12dcae0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Let&#39;s look at the Expression info</span>
+<span class="n">mapTo5</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[37]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Lambda</td><td>parameter:&nbsp;1<br>body:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/ee0040d5dfe477769750d3eee2534a9fec12dcae0/expr.html"><img src="__pv_it/ee0040d5dfe477769750d3eee2534a9fec12dcae0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>1</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>2</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.html"><img src="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here is an example with multiple <em>parameters</em> and <em>conditions</em> that are represented by <code>ExprList</code>s.  This maps a pair of real numbers to the first element (invoking the <code>InSet</code> <a href="#Operation">Operation</a>):</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Can have multiple arguments</span>
+<span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">InSet</span>
+<span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">Reals</span>
+<span class="n">lambdaExpr</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">omega</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">InSet</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Reals</span><span class="p">),</span> <span class="n">InSet</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">Reals</span><span class="p">)])</span>
+<span class="n">lambdaExpr</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[38]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/48f3705c8022ba41a43bdd723b2c086a636bb8220/expr.html"><img src="__pv_it/48f3705c8022ba41a43bdd723b2c086a636bb8220/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Expression info shows how the Lambda is broken down into arguments and the expression as sub-expression.</span>
+<span class="n">lambdaExpr</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[39]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Lambda</td><td>parameters:&nbsp;1<br>body:&nbsp;8<br>conditions:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/48f3705c8022ba41a43bdd723b2c086a636bb8220/expr.html"><img src="__pv_it/48f3705c8022ba41a43bdd723b2c086a636bb8220/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>1</td><td>ExprList</td><td>8, 9</td><td><a class="ProveItLink" href="__pv_it/97449121e318e189a0d4bb0910874f0c49a240330/expr.html"><img src="__pv_it/97449121e318e189a0d4bb0910874f0c49a240330/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>2</td><td>ExprList</td><td>3, 4</td><td><a class="ProveItLink" href="__pv_it/c9d63c653903cf2523c86222d70fac337a216f5a0/expr.html"><img src="__pv_it/c9d63c653903cf2523c86222d70fac337a216f5a0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>3</td><td>Operation</td><td>operator:&nbsp;6<br>operands:&nbsp;5<br></td><td><a class="ProveItLink" href="__pv_it/2fc5984e10bab9f1946bcf65549aeb2930f8c5e70/expr.html"><img src="__pv_it/2fc5984e10bab9f1946bcf65549aeb2930f8c5e70/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>4</td><td>Operation</td><td>operator:&nbsp;6<br>operands:&nbsp;7<br></td><td><a class="ProveItLink" href="__pv_it/81e258a9dae780f678de8a7e0ff6e8e63f3a72760/expr.html"><img src="__pv_it/81e258a9dae780f678de8a7e0ff6e8e63f3a72760/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>5</td><td>ExprList</td><td>8, 10</td><td><a class="ProveItLink" href="__pv_it/cbc1578dc647a7c4d69c129f984f3e34fd78456e0/expr.html"><img src="__pv_it/cbc1578dc647a7c4d69c129f984f3e34fd78456e0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>6</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/logic/set_theory/membership/__pv_it/088cbc857536a28d4119ad9639a84270ccb0545d0/expr.html"><img src="../packages/proveit/logic/set_theory/membership/__pv_it/088cbc857536a28d4119ad9639a84270ccb0545d0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>7</td><td>ExprList</td><td>9, 10</td><td><a class="ProveItLink" href="__pv_it/9b58220d001997c3a394379b32c0e142ab00f71e0/expr.html"><img src="__pv_it/9b58220d001997c3a394379b32c0e142ab00f71e0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>8</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>9</td><td>Variable</td><td></td><td><a class="ProveItLink" href="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.html"><img src="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>10</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/sets/real/__pv_it/c69b21a7605f74b7de6f2b0e27a26f9af7918cb30/expr.html"><img src="../packages/proveit/number/sets/real/__pv_it/c69b21a7605f74b7de6f2b0e27a26f9af7918cb30/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Lambda-substitution/relabeling">Lambda substitution/relabeling<a class="anchor-link" href="#Lambda-substitution/relabeling">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A very important property of a <code>Lambda</code> is that it defines a new "scope" for its parameters.  The parameter <strong>Variable</strong>s may be <em>relabeled</em>, but they will not be substituted.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lambdaExpr</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">omega</span><span class="p">:</span><span class="n">y</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[40]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/fd38c308bf28bc38c8631c21ebad6d5486b9f9590/expr.html"><img src="__pv_it/fd38c308bf28bc38c8631c21ebad6d5486b9f9590/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lambdaExpr</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">aLit</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[41]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/48f3705c8022ba41a43bdd723b2c086a636bb8220/expr.html"><img src="__pv_it/48f3705c8022ba41a43bdd723b2c086a636bb8220/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can substitute a Variable that is not an argument, however:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mapTo5</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">FIVE</span><span class="p">:</span><span class="n">aLit</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[42]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/ac7170fa482eae45767253b96d2614478a09413a0/expr.html"><img src="__pv_it/ac7170fa482eae45767253b96d2614478a09413a0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There are important limits regarding <em>relabeling</em> and <em>substitution</em> within the "scope" of the <code>Lambda</code>.  In particular, parameters of the Lambda function are "reserved" and may not be used in <em>substitution</em> or <em>relabeling</em>.  Otherwise, you could alter the meaning of the <strong>expression</strong> in ways that can invalidate a proof (i.e., via a <em>specialization</em> step which relies upon <em>expression substitution</em> internally).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ScopingViolation</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Lambda</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">omega</span><span class="p">],</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">z</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ScopingViolation error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ScopingViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Lambda</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">omega</span><span class="p">],</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">z</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ScopingViolation error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ScopingViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR:  Must not make substitution with reserved variables  (i.e., parameters of a Lambda function)
+EXPECTED ERROR:  Relabeling in violation of Variable scoping restrictions.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In addition, Lambda parameters must be distinct.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ImproperSubstitution</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Lambda</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">omega</span><span class="p">],</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ImproperSubstitution error; should not make it to this point&quot;</span>    
+<span class="k">except</span> <span class="n">ImproperSubstitution</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR:  Lambda parameters Variables must be unique with respect to each other.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It is possible, however, to perform simultaneous <em>relabeling</em> that is consistent (retains the meaning).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lambdaExpr</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">omega</span><span class="p">,</span> <span class="n">omega</span><span class="p">:</span><span class="n">x</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[45]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/e8dbd5bafcfa85e15a5fbbda00b55f482657c0760/expr.html"><img src="__pv_it/e8dbd5bafcfa85e15a5fbbda00b55f482657c0760/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Operation"><a name="Operation" />Operation<a class="anchor-link" href="#Operation">&#182;</a></h1><p>This type of <strong>expression</strong> represents an applied operation.  It contains <em>operator(s)</em> (one or more <code>Label</code>s and may also include <code>Iteration</code>s of <code>Indexed</code> <code>Label</code>s that will be discussed in the <a href="tutorial10_advanced_expr.ipynb#Iteration">Iteration</a> section of the <a href="tutorial10_advanced_expr.ipynb">advanced expressions</a> chapter) and <em>operand(s)</em> (one or more of any <code>Expression</code>).  The default formatting of an <code>Operation</code> with one <em>operator</em> and more than one <em>operand</em> is to place the <em>operator</em> between each successive pair of <em>operands</em> as follows.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Operation</span>
+<span class="n">Operation</span><span class="p">(</span><span class="n">TIMES</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">omega</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[46]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/0f0f6371a074271c355012223df7e4ba9a8cec0a0/expr.html"><img src="__pv_it/0f0f6371a074271c355012223df7e4ba9a8cec0a0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A <code>Function</code> is derived from <code>Operation</code>.  It behaves in the same manner except it formats it in a "function" style:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Function</span>
+
+<span class="c1"># Simple case: a Variable operator with a single Variable operand</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+<span class="n">fx</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">fx</span> <span class="c1"># f(x)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[47]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Common forms of these are available from <a class="ProveItLink" href="../packages/proveit/_common_.html">proveit.common</a>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">fx</span><span class="p">,</span> <span class="n">gx</span><span class="p">,</span> <span class="n">Px</span><span class="p">,</span> <span class="n">Qx</span>
+<span class="n">ExprList</span><span class="p">(</span><span class="n">fx</span><span class="p">,</span> <span class="n">gx</span><span class="p">,</span> <span class="n">Px</span><span class="p">,</span> <span class="n">Qx</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[48]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/971db30bb17e901491764a0cf080fc8a710701230/expr.html"><img src="__pv_it/971db30bb17e901491764a0cf080fc8a710701230/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's derive a couple of classes from <code>Operation</code> to represent operations with pecific literal operators.
+This is commonly done within Prove-It library modules.  We use the <code>%load</code> magic command to display (and execute) the contents of <a href="demo_operations.py">demo_operations.py</a>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># %load demo_operations.py</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Module that defines a Factorial Operation purely for purposes of a</span>
+<span class="sd">tutorial.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Operation</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="k">class</span> <span class="nc">Factorial</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="c1"># _operator_ is a special class variable name, defining specific literal operator of the Operation class.</span>
+    <span class="c1"># It is not only used for default formatting but also when performing substitutions for rebuilding expressions.</span>
+    <span class="n">_operator_</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operand</span><span class="p">):</span>
+        <span class="c1"># creates the Operation with FACTORIAL as the operator and the provided operand as its only operand.</span>
+        <span class="n">Operation</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Factorial</span><span class="o">.</span><span class="n">_operator_</span><span class="p">,</span> <span class="n">operand</span><span class="p">)</span> <span class="c1"># initializes self.operand</span>
+
+    <span class="k">def</span> <span class="nf">string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="c1"># should accept kwargs even when not used (e.g., &#39;fence&#39;)</span>
+        <span class="c1"># the operand should be fenced (wrapped in parentheses) to prevent ambiguity</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operand</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="n">fence</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="n">Factorial</span><span class="o">.</span><span class="n">_operator_</span><span class="o">.</span><span class="n">string</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="c1"># should accept kwargs even when not used (e.g., &#39;fence&#39;)</span>
+        <span class="c1"># the operand should be fenced (wrapped in parentheses) to prevent ambiguity</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operand</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">fence</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="n">Factorial</span><span class="o">.</span><span class="n">_operator_</span><span class="o">.</span><span class="n">latex</span><span class="p">()</span> 
+
+<span class="k">class</span> <span class="nc">Multiply</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    
+    <span class="c1"># This operator Literal has a LaTeX format that differs from the string format.</span>
+    <span class="n">_operator_</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\times&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">operands</span><span class="p">):</span> <span class="c1"># takes a list of arguments as the operands</span>
+        <span class="c1"># creates the AssociativeOperation with TIMES as the operator and any number of operands.</span>
+        <span class="n">Operation</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Multiply</span><span class="o">.</span><span class="n">_operator_</span><span class="p">,</span> <span class="n">operands</span><span class="p">)</span>
+    
+    <span class="c1"># The default formatting will display the operator between the operands</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In order to work properly, however, we need to import these classes from the module (as Prove-It will use the <code>__file__</code> attribute of this module for its internal purposes).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">demo_operations</span> <span class="k">import</span> <span class="n">Factorial</span><span class="p">,</span> <span class="n">Multiply</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A <code>Factorial</code> is an <code>Operation</code> with "!" as the format of the <code>Literal</code> operator.  Its formatting is altered from the default but is still true to the core <code>Expression</code> structure (the formatting is a reflection of the internal structure).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Now we can make an object with this new class</span>
+<span class="n">xFactorial</span> <span class="o">=</span> <span class="n">Factorial</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[51]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="xFactorial">xFactorial:</strong> <a class="ProveItLink" href="__pv_it/f298b6802ab61432aea8682a150b9f30732ed7760/expr.html"><img src="__pv_it/f298b6802ab61432aea8682a150b9f30732ed7760/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># show core structure</span>
+<span class="n">xFactorial</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[52]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operand:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/f298b6802ab61432aea8682a150b9f30732ed7760/expr.html"><img src="__pv_it/f298b6802ab61432aea8682a150b9f30732ed7760/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.html"><img src="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>2</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the Jupyter notebook setting, we typically only use LaTeX formatting, but it is important to define the string formatting as well for whenever it is needed (e.g., when error messages are displayed).  The <code>fence=True</code> above indicates that parentheses should be used when it could be ambiguous otherwise.  Our example above has no ambiguity, so parentheses are not used.  We will show a case below where the parentheses are required.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next we consider a multiple <em>operand</em> example using the <code>Multiply</code> class that we imported from <a href="demo_operations.py">demo_operations.py</a> above.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Demonstrating an Operation with multiple operands</span>
+<span class="n">multExpr</span> <span class="o">=</span> <span class="n">Multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">FIVE</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[53]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="multExpr">multExpr:</strong> <a class="ProveItLink" href="__pv_it/2565fdf1866ce9fc049e408921515bff5bff5a040/expr.html"><img src="__pv_it/2565fdf1866ce9fc049e408921515bff5bff5a040/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Let&#39;s nest Operations and show proper fencing behavior</span>
+<span class="n">nestedOperation</span> <span class="o">=</span> <span class="n">Factorial</span><span class="p">(</span><span class="n">multExpr</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[54]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="nestedOperation">nestedOperation:</strong> <a class="ProveItLink" href="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.html"><img src="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nestedOperation</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[55]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operand:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.html"><img src="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.html"><img src="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>2</td><td>Operation</td><td>operator:&nbsp;3<br>operands:&nbsp;4<br></td><td><a class="ProveItLink" href="__pv_it/2565fdf1866ce9fc049e408921515bff5bff5a040/expr.html"><img src="__pv_it/2565fdf1866ce9fc049e408921515bff5bff5a040/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>3</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/7fa9fd20fee7806a99050bf24ffcbd2251e9b7fe0/expr.html"><img src="__pv_it/7fa9fd20fee7806a99050bf24ffcbd2251e9b7fe0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>4</td><td>ExprList</td><td>5, 6, 7</td><td><a class="ProveItLink" href="__pv_it/ef75f1d75018e14cfdae0b795a5d0b669cfa9c940/expr.html"><img src="__pv_it/ef75f1d75018e14cfdae0b795a5d0b669cfa9c940/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>5</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>6</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.html"><img src="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>7</td><td>Variable</td><td></td><td><a class="ProveItLink" href="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.html"><img src="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Operand-substitution/relabeling">Operand substitution/relabeling<a class="anchor-link" href="#Operand-substitution/relabeling">&#182;</a></h3><p><em>Substitution</em> and <em>relabeling</em> of <em>operands</em> is straightforward in the way it works.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xFactorial</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[56]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/17856ef61df51dccbc9c97ee8f8f57a7620651070/expr.html"><img src="__pv_it/17856ef61df51dccbc9c97ee8f8f57a7620651070/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nestedOperationFromSub</span> <span class="o">=</span> <span class="n">xFactorial</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">multExpr</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[57]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="nestedOperationFromSub">nestedOperationFromSub:</strong> <a class="ProveItLink" href="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.html"><img src="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Internally, however, there is specific machinery required to regenerate these objects and construct them with the proper classes.  In order for this machinery to work, the <code>_operator_</code> class attribute must be properly defined (e.g., <code>Factorial._operator_</code> and <code>Multiply._operator_</code>).  To demonstrate that this is working properly, note that the classes displayed in the detailed expression info are as they should be:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nestedOperationFromSub</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">(</span><span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[58]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operand:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.html"><img src="__pv_it/1ad9438eec31cc6ab76c401e45ba17180946b8060/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>class:</strong> tutorial.demo_operations.Factorial</td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.html"><img src="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+<tr><td>2</td><td>Operation</td><td>operator:&nbsp;3<br>operands:&nbsp;4<br></td><td><a class="ProveItLink" href="__pv_it/2565fdf1866ce9fc049e408921515bff5bff5a040/expr.html"><img src="__pv_it/2565fdf1866ce9fc049e408921515bff5bff5a040/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>class:</strong> tutorial.demo_operations.Multiply</td></tr>
+<tr><td>3</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/7fa9fd20fee7806a99050bf24ffcbd2251e9b7fe0/expr.html"><img src="__pv_it/7fa9fd20fee7806a99050bf24ffcbd2251e9b7fe0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+<tr><td>4</td><td>ExprList</td><td>5, 6, 7</td><td><a class="ProveItLink" href="__pv_it/ef75f1d75018e14cfdae0b795a5d0b669cfa9c940/expr.html"><img src="__pv_it/ef75f1d75018e14cfdae0b795a5d0b669cfa9c940/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>5</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>6</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.html"><img src="__pv_it/084027c5e7faf3e99fe505f569d22a93a32e5b730/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+<tr><td>7</td><td>Variable</td><td></td><td><a class="ProveItLink" href="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.html"><img src="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Furthermore, this expression that we obtained via substitution is equivalent to the one constructed directly:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expressions, generated in different ways, are the same:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">nestedOperationFromSub</span> <span class="o">==</span> <span class="n">nestedOperation</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Expressions, generated in different ways, are the same: True
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Operator-substitution/relabeling">Operator substitution/relabeling<a class="anchor-link" href="#Operator-substitution/relabeling">&#182;</a></h3><p>The <em>operator</em> may likewise be <em>substituted</em> or <em>relabeled</em>, but with some interesting extra capabilities.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It is straightforward to <em>relabel</em> a <strong>Variable</strong> <em>operator</em> with another <strong>Variable</strong>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">g</span>
+<span class="n">fx</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">f</span><span class="p">:</span><span class="n">g</span><span class="p">})</span> <span class="c1"># Variable operator to a different Variable</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[60]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="../packages/proveit/__pv_it/89d5be7a1c57e84a6e56aa45006f938a851d441b0/expr.html"><img src="../packages/proveit/__pv_it/89d5be7a1c57e84a6e56aa45006f938a851d441b0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And it is straightforward to <em>substitute</em> a <strong>Variable</strong> <em>operator</em> with a <strong>Literal</strong>.  This is generally not desirable, however, because it may not have the appropriate class.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xFactorial_from_fx</span> <span class="o">=</span> <span class="n">fx</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">f</span><span class="p">:</span><span class="n">FACTORIAL</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[61]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="xFactorial_from_fx">xFactorial_from_fx:</strong> <a class="ProveItLink" href="__pv_it/10c7cba2d7a518a9580def8d63c8f9295fd8d63e0/expr.html"><img src="__pv_it/10c7cba2d7a518a9580def8d63c8f9295fd8d63e0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xFactorial_from_fx</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">(</span><span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[62]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operand:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/10c7cba2d7a518a9580def8d63c8f9295fd8d63e0/expr.html"><img src="__pv_it/10c7cba2d7a518a9580def8d63c8f9295fd8d63e0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>class:</strong> tutorial.demo_operations.Factorial</td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.html"><img src="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+<tr><td>2</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">xFactorial_from_fx</span> <span class="o">==</span> <span class="n">xFactorial</span> <span class="c1"># Same</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It is able to produce generate the new <strong>expression</strong> in the appropriate <code>Factorial</code> class via the internal mechanisms that use its <code>_operator_</code> class attribute.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Performing an <em>expression substitution</em> of a <code>Literal</code> <em>operator</em> within an <code>Operation</code> class will typically be blocked because it will not know how to make the new <strong>expression</strong>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">OperationError</span>
+<span class="c1"># But this will typically be prevented (appropriately) in trying to remake a derived Operation class:</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">xFactorial</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">FACTORIAL</span><span class="p">:</span><span class="n">SUMMATION</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an OperationError error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">OperationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: An implicit operator may not be changed
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Operation-substitution">Operation substitution<a class="anchor-link" href="#Operation-substitution">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The more interesting and useful case is to <em>substitute</em> the <code>Operation</code> itself.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fx</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">f</span><span class="p">:</span><span class="n">Lambda</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Factorial</span><span class="p">(</span><span class="n">y</span><span class="p">))})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[65]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/f298b6802ab61432aea8682a150b9f30732ed7760/expr.html"><img src="__pv_it/f298b6802ab61432aea8682a150b9f30732ed7760/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that the operand is still $x$ (not $y$).  This is substituting the operation, not the operand.  If desired, however, it could be substituted simultaneously:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">omegaFactorial</span> <span class="o">=</span> <span class="n">fx</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">f</span><span class="p">:</span><span class="n">Lambda</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Factorial</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="n">x</span><span class="p">:</span><span class="n">omega</span><span class="p">})</span>
+<span class="n">omegaFactorial</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[66]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/17856ef61df51dccbc9c97ee8f8f57a7620651070/expr.html"><img src="__pv_it/17856ef61df51dccbc9c97ee8f8f57a7620651070/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">omegaFactorial</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">(</span><span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[67]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operand:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/17856ef61df51dccbc9c97ee8f8f57a7620651070/expr.html"><img src="__pv_it/17856ef61df51dccbc9c97ee8f8f57a7620651070/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>class:</strong> tutorial.demo_operations.Factorial</td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.html"><img src="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+<tr><td>2</td><td>Variable</td><td></td><td><a class="ProveItLink" href="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.html"><img src="__pv_it/9d7c4e1c5ee4d34a7826567c9ff37cf313ab71e60/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that by substituting $f$ with a <code>Lambda</code> expression, the entire <code>Operation</code> is substituted, not just the <em>operator</em>.  This is why <code>Lambda</code> <em>operator</em>s (only <code>Label</code> operators) are not allowed; otherwise, such a substitution could be ambiguous or confusing (should it substitute the <code>Operation</code> or substitute the <em>operator</em> with the <code>Lambda</code> expression?).  This also highlights the fact that <strong>Prove-It</strong> is not a functional programming or lambda calculus.  Rather, <strong>Prove-It</strong> is designed for manipulating expressions as desired, and <em>operation substitution</em> is a useful and powerful, yet relatively straightforward tool for doing so.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Mocking-up-Lambda-operators">Mocking up <strong>Lambda</strong> operators<a class="anchor-link" href="#Mocking-up-Lambda-operators">&#182;</a></h3><p>It would not be consistent with the <strong>Prove-It</strong> philosophy of <em>freedom of expression</em> to completely disallow expressions involving a <code>Lambda</code> function applied to operand(s).  While having a <code>Lambda</code> <em>operator</em> for an <code>Operation</code> is not allowed, we are free to make an <code>Operation</code> class whose <em>operands</em> are the <code>Lambda</code> function as well as the operand on which we wish to apply the function. As a demonstration, we define such an <code>Operation</code>, called <code>LambdaApplication</code>, in <a href="demo_lambda_app_operation.py">demo_lambda_app_operation.py</a>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># %load demo_lambda_app_operation</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Module that defines a LambdaApplication Operation</span>
+<span class="sd">class for demonstration purposes in this tutorial.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Operation</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">NamedExprs</span>
+
+<span class="k">class</span> <span class="nc">LambdaApplication</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="n">_operator_</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;LAMBDA_APPLICATION&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;{\rm LAMBDA\_APPLICATION}&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lambdaFn</span><span class="p">,</span> <span class="n">operand</span><span class="p">):</span>
+        <span class="n">Operation</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">LambdaApplication</span><span class="o">.</span><span class="n">_operator_</span><span class="p">,</span> <span class="n">NamedExprs</span><span class="p">([(</span><span class="s1">&#39;lambdaFn&#39;</span><span class="p">,</span><span class="n">lambdaFn</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;operand&#39;</span><span class="p">,</span><span class="n">operand</span><span class="p">)]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lambdaFn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="s1">&#39;lambdaFn&#39;</span><span class="p">]</span> <span class="c1"># The Lambda function operand</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lambdaOperand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="s1">&#39;operand&#39;</span><span class="p">]</span> <span class="c1"># The operand of the Lambda function</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">extractInitArgValue</span><span class="p">(</span><span class="n">operationClass</span><span class="p">,</span> <span class="n">argName</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">operand</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Given a name of one of the arguments of the __init__ method,</span>
+<span class="sd">        return the corresponding value as determined by the operator and</span>
+<span class="sd">        operand of the LambdaApplication Operation.</span>
+<span class="sd">        (This is important so that Prove-It knows how to &#39;make&#39; an altered</span>
+<span class="sd">        copy of this Operation).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operand</span><span class="p">,</span> <span class="n">NamedExprs</span><span class="p">),</span> <span class="s2">&quot;Expecting LambdaApplication operand to be a NamedExprs object&quot;</span>
+        <span class="k">if</span> <span class="n">argName</span><span class="o">==</span><span class="s1">&#39;lambdaFn&#39;</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="n">operand</span><span class="p">[</span><span class="s1">&#39;lambdaFn&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">argName</span><span class="o">==</span><span class="s1">&#39;operand&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">operand</span><span class="p">[</span><span class="s1">&#39;operand&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="c1"># should accept kwargs even when not used (e.g., &#39;fence&#39;)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambdaFn</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="n">fence</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambdaOperand</span><span class="o">.</span><span class="n">string</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="c1"># should accept kwargs even when not used (e.g., &#39;fence&#39;)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambdaFn</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">fence</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambdaOperand</span><span class="o">.</span><span class="n">latex</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">demo_lambda_app_operation</span> <span class="k">import</span> <span class="n">LambdaApplication</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lambdaAppExpr</span> <span class="o">=</span> <span class="n">LambdaApplication</span><span class="p">(</span><span class="n">Lambda</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Factorial</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[70]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="lambdaAppExpr">lambdaAppExpr:</strong> <a class="ProveItLink" href="__pv_it/ea69319740ece1b99b3f7ca7398eddbe4b49d0f40/expr.html"><img src="__pv_it/ea69319740ece1b99b3f7ca7398eddbe4b49d0f40/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that the <code>_operator_</code> of the <code>LambdaApplication</code> s not displayed but is implicit in the context of the lambda application formatting.  Also, we made use of <code>NamedExprs</code> which will be discussed next.  Let us take a look at the expression information.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lambdaAppExpr</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">(</span><span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[71]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operands:&nbsp;2<br></td><td><a class="ProveItLink" href="__pv_it/ea69319740ece1b99b3f7ca7398eddbe4b49d0f40/expr.html"><img src="__pv_it/ea69319740ece1b99b3f7ca7398eddbe4b49d0f40/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>class:</strong> tutorial.demo_lambda_app_operation.LambdaApplication</td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/b972b254f0859e9da344ee20375eddf3388d76660/expr.html"><img src="__pv_it/b972b254f0859e9da344ee20375eddf3388d76660/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+<tr><td>2</td><td>NamedExprs</td><td>lambdaFn: 3<br>operand: 4<br></td><td><a class="ProveItLink" href="__pv_it/d02eb9893db949c88d9d38f1d0d29ee34d9e51e10/expr.html"><img src="__pv_it/d02eb9893db949c88d9d38f1d0d29ee34d9e51e10/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>3</td><td>Lambda</td><td>parameter:&nbsp;7<br>body:&nbsp;5<br></td><td><a class="ProveItLink" href="__pv_it/6416a795026847564c8dd831a4e74090b86f10750/expr.html"><img src="__pv_it/6416a795026847564c8dd831a4e74090b86f10750/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>4</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>5</td><td>Operation</td><td>operator:&nbsp;6<br>operand:&nbsp;7<br></td><td><a class="ProveItLink" href="__pv_it/26a0e35b392fe0647ba3a0907c7e4dd1d46cdbc60/expr.html"><img src="__pv_it/26a0e35b392fe0647ba3a0907c7e4dd1d46cdbc60/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>class:</strong> tutorial.demo_operations.Factorial</td></tr>
+<tr><td>6</td><td>Literal</td><td></td><td><a class="ProveItLink" href="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.html"><img src="__pv_it/d6af88116966bca28fcbee5fe103a74f1e8a81d50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td colspan=4 style="text-align:left"><strong>context:</strong> tutorial</td></tr>
+<tr><td>7</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.html"><img src="../packages/proveit/__pv_it/f8b9edf8e16034727f0aad55bb83e392c3db40d40/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Axioms</strong> could then be created to define how the <code>LambdaApplication</code> <strong>operation</strong> actually operates, but <strong>axioms</strong> will be discussed in a later chapter.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="NamedExprs">NamedExprs<a class="anchor-link" href="#NamedExprs">&#182;</a></h1><p><code>NamedExprs</code> is a composite <strong>expression</strong> that maps string keywords to sub-<strong>expressions</strong>.  The reason that this may be desired is to be explicit in the internal representation about the role of each sub-<strong>expression</strong> so there is no ambiguity between the internal and external representation.  A good example is <code>lambdaAppExpr</code> above where one <em>operand</em> plays the role of the lambda function and the other <em>operand</em> plays the role of the lambda function's operand.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here is a more rudimentary demonstration of using <strong>NamedExpressions</strong>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">NamedExprs</span>
+<span class="n">NamedExprs</span><span class="p">([(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;product&#39;</span><span class="p">,</span><span class="n">Multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[72]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/9941d721133c0007c4611b8db3d6d78ef27ca3a50/expr.html"><img src="__pv_it/9941d721133c0007c4611b8db3d6d78ef27ca3a50/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To produce a <code>NamedExprs</code> object, you must supply a list of (keyword, <code>Expression</code>) pairs.  The keywords must be strings.  When the <strong>NamedExprs</strong> is displayed, it will show each of these pairs in the order that they were originally provided.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="ExprList"><a name="ExprList" />ExprList<a class="anchor-link" href="#ExprList">&#182;</a></h1><p>We have seen examples of <code>ExprList</code>s above.  On its own, it is simple.  It becomes more interesting when we discuss <code>Iter</code>s below.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[73]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ExprList</span>
+<span class="n">xy</span> <span class="o">=</span> <span class="n">ExprList</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[73]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="xy">xy:</strong> <a class="ProveItLink" href="__pv_it/456ecced626d4e9a804b9e6eae2e02d31d6a33f50/expr.html"><img src="__pv_it/456ecced626d4e9a804b9e6eae2e02d31d6a33f50/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[74]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xyz</span> <span class="o">=</span> <span class="n">ExprList</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[74]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="xyz">xyz:</strong> <a class="ProveItLink" href="__pv_it/296479de65b64e4916937db7d77282be287cb5880/expr.html"><img src="__pv_it/296479de65b64e4916937db7d77282be287cb5880/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Substitution is straightforward:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fancyList</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">z</span><span class="p">:</span><span class="n">nestedOperation</span><span class="p">})</span>
+<span class="n">fancyList</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[75]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/7df2039d553fc10d4e49382fa5720113d57f297d0/expr.html"><img src="__pv_it/7df2039d553fc10d4e49382fa5720113d57f297d0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[76]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Let&#39;s keep it up</span>
+<span class="n">fancierList</span> <span class="o">=</span> <span class="n">fancyList</span><span class="o">.</span><span class="n">substituted</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">nestedOperation</span><span class="p">})</span>
+<span class="n">fancierList</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[76]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/5b005c6472db4ab258e4291113f06672c66ba34c0/expr.html"><img src="__pv_it/5b005c6472db4ab258e4291113f06672c66ba34c0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Nesting <code>ExprList</code>s is possible:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ExprList</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ExprList</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[77]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/2d8e27e22afab372709b887cd57c1c8c475b4b3d0/expr.html"><img src="__pv_it/2d8e27e22afab372709b887cd57c1c8c475b4b3d0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It is also useful to note that, as a convenience, python lists of <strong>expressions</strong> are typically transformed automatically into an <code>ExprList</code> when they are passed into <strong>Prove-It</strong> methods that accept or expect them for that argument.  For example, the following generates the same <strong>expression</strong> as above.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ExprList</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[78]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/2d8e27e22afab372709b887cd57c1c8c475b4b3d0/expr.html"><img src="__pv_it/2d8e27e22afab372709b887cd57c1c8c475b4b3d0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Advanced-Expressions"><a name="AdvancedExprs" />Advanced Expressions<a class="anchor-link" href="#Advanced-Expressions">&#182;</a></h1><p>More advanced types of expressions will be discussed in a <a href="tutorial10_advanced_expr.ipynb">later chapter</a>.  These advanced expressions allow multi-dimensional representations of mathematical structure (for example, explicit matrix representations or quantum circuits) via the <a href="tutorial10_advanced_expr.ipynb#ExprT?ensor">`ExprTensor`</a> type as well as iterated ranges within lists or tensors via the <a href="tutorial10_advanced_expr.ipynb#ExprTensor">`Iter`</a> type (e.g., $x_1 +~\ldots~+ x_n$).  These advanced expression types are useful in forming explicit representations commonly used to communicate mathematical concepts.  They are not necessary, however, in general theorem proving.  One could choose not to use such constructs and only represent such concepts via implicit representations and recursion.  Following the <strong>Prove-It</strong> philosophy, however, we want to allow the use of explicit representation tied as directly as possible into our formal proofs.  But we will skip these for now so we can cover our theorem proving concepts without this extra complication.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[79]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">end</span> basic_expressions
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Next-chapter:-Proof-Basics">Next chapter: <a class="ProveItLink" href="tutorial02_proof_basics.html">Proof Basics</a><a class="anchor-link" href="#Next-chapter:-Proof-Basics">&#182;</a></h1><h2 id="Table-of-Contents"><a class="ProveItLink" href="tutorial00_introduction.html#contents">Table of Contents</a><a class="anchor-link" href="#Table-of-Contents">&#182;</a></h2>
+</div>
+</div>
+</div>
+    </div>
+  </div>
+<footer>
+  <p>These web pages were generated on 2019-07-14 by <a href="https://github.com/PyProveIt/Prove-It">Prove-It</a> Beta Version 0.3, licensed under the GNU Public License by Sandia Corporation.</p>
+  <p>Presented proofs are not absolutely guaranteed.  For assurance, it is important to check the structure 
+  of the statement being proven, independently verify the derivation steps, track dependencies, and ensure that 
+  employed axioms are valid and properly structured.  Inconsistencies may exist, unknowingly, in this system.
+  </p>
+  <p>
+  This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research, under the Quantum Computing Application Teams program. Sandia National Labs is managed and operated by National Technology and Engineering Solutions of Sandia, LLC, a subsidiary of Honeywell International, Inc., for the U.S. Dept. of Energy's NNSA under contract DE-NA0003525. The views expressed above do not necessarily represent the views of the DOE or the U.S. Government.
+  </p>
+  <br>
+  <p>Please send questions/comments to: <a href="mailto:wwitzel@sandia.gov">
+  wwitzel@sandia.gov</a>.</p>
+</footer> 
+</body>
+
+ 
+
+
+</html>

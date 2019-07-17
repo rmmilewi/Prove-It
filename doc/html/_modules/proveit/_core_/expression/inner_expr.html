@@ -1,0 +1,473 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>proveit._core_.expression.inner_expr &#8212; Prove-It 0.3 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for proveit._core_.expression.inner_expr</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.expr</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">.operation</span> <span class="k">import</span> <span class="n">Function</span>
+<span class="kn">from</span> <span class="nn">.lambda_expr</span> <span class="k">import</span> <span class="n">Lambda</span>
+<span class="kn">from</span> <span class="nn">.composite</span> <span class="k">import</span> <span class="n">ExprList</span><span class="p">,</span> <span class="n">Composite</span><span class="p">,</span> <span class="n">NamedExprs</span><span class="p">,</span> <span class="n">compositeExpression</span>
+<span class="kn">from</span> <span class="nn">proveit._core_.defaults</span> <span class="k">import</span> <span class="n">USE_DEFAULTS</span>
+
+<div class="viewcode-block" id="InnerExpr"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr">[docs]</a><span class="k">class</span> <span class="nc">InnerExpr</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Represents an &quot;inner&quot; sub-expression of a particular &quot;topLevel&quot; </span>
+<span class="sd">    expression.  The innerExpr method of the Expression class </span>
+<span class="sd">    will start an InnerExpr with that particular expression as </span>
+<span class="sd">    the top-level.  This acts as an expression wrapper, </span>
+<span class="sd">    starting at the top-level expression but can &quot;descend&quot; to</span>
+<span class="sd">    any sub-expression via accessing sub-expression attributes.</span>
+<span class="sd">    </span>
+<span class="sd">    For example, let &quot;expr = [(a + b + a/d) &lt; e]&quot;, and let</span>
+<span class="sd">    &quot;inner_expr = expr.innterExpr().lhs.terms[2].numerator&quot;.  Then</span>
+<span class="sd">    </span>
+<span class="sd">    1. inner_expr.replMap() will return _x_ -&gt; [(a + b + _x_/d) &lt; e],</span>
+<span class="sd">       replacing the particular innerexpr.</span>
+<span class="sd">       (note that the second &quot;a&quot; is singled out, distinct from</span>
+<span class="sd">       the first &quot;a&quot; because the subexpr object tracks the</span>
+<span class="sd">       sub-expression by &quot;location&quot;).</span>
+<span class="sd">    2. inner_expr.withStyles(somestyle=&#39;something&#39;) will return an</span>
+<span class="sd">       expression that is the same as expr but with a style</span>
+<span class="sd">       change for the second &quot;a&quot;.  Works more generally for any</span>
+<span class="sd">       &quot;with...&quot; method.</span>
+<span class="sd">    3. inner_expr.simplification() or inner_expr.evaluation()</span>
+<span class="sd">       will return, as a KnownTruth,</span>
+<span class="sd">       [(a + b + a/d) &lt; e] = [(a + b + v/d) &lt; e]</span>
+<span class="sd">       where a=v is the simplification/evaluation of a</span>
+<span class="sd">       (v must be an irreducible value in the evaluation case).</span>
+<span class="sd">    4. inner_expr.simplify() or inner_expr.evaluate() only works</span>
+<span class="sd">       assuming expr is a KnownTruth expression.  Then it will</span>
+<span class="sd">       prove or return [(a + b + v/d) &lt; e] as a KnownTruth where</span>
+<span class="sd">       a=v is the simplification/evaluation of a</span>
+<span class="sd">       (v must be an irreducible value in the evaluation case).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topLevelExpr</span><span class="p">,</span> <span class="n">innerExprPath</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create an InnerExpr with the given top-level Expression.</span>
+<span class="sd">        Optionally, subExprPath is a sequence of sub-Expression indices</span>
+<span class="sd">        starting from the topLevel expression as the root to produce</span>
+<span class="sd">        a map for replacing the corresponding sub-Expression.  A new</span>
+<span class="sd">        SubExprRepl is generated appropriately, extending the </span>
+<span class="sd">        sub-Expression path, when getting an item or attribute</span>
+<span class="sd">        that corresponds with an item/attribute of the currently</span>
+<span class="sd">        mapped sub-Expression.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">KnownTruth</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topLevelExpr</span><span class="p">,</span> <span class="n">KnownTruth</span><span class="p">):</span>
+            <span class="n">topLevelExpr</span> <span class="o">=</span> <span class="n">topLevelExpr</span><span class="o">.</span><span class="n">expr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">innerExprPath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span> <span class="o">=</span> <span class="p">[</span><span class="n">topLevelExpr</span><span class="p">]</span>
+        <span class="c1"># list all of the lambda expression parameters encountered</span>
+        <span class="c1"># along the way from the top-level expression to the inner expression.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">)</span> <span class="ow">and</span> <span class="n">idx</span><span class="o">==</span><span class="n">expr</span><span class="o">.</span><span class="n">numSubExpr</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># while descending into a lambda expression body, we</span>
+                <span class="c1"># pick up the lambda parameters.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">subExpr</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span><span class="o">==</span><span class="n">other</span><span class="o">.</span><span class="n">innerExprPath</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="o">==</span><span class="n">other</span><span class="o">.</span><span class="n">exprHierarchy</span>
+    
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        If the currently mapped sub-Expression of the SubExprRepl</span>
+<span class="sd">        is a Composite, accessing an item corresponding to an item</span>
+<span class="sd">        of this Composite will return the SubExprRepl with the extended </span>
+<span class="sd">        path to this item.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">curInnerExpr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curInnerExpr</span><span class="p">,</span> <span class="n">ExprList</span><span class="p">):</span>
+            <span class="c1"># For an ExprList, the item key is simply the index of the sub-Expression</span>
+            <span class="k">return</span> <span class="n">InnerExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span> <span class="o">+</span> <span class="p">(</span><span class="n">key</span><span class="p">,))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curInnerExpr</span><span class="p">,</span> <span class="n">Composite</span><span class="p">):</span>
+            <span class="c1"># For any other Composite (ExprTensor or NamedExprs), the key is the key of the Composite dictionary.</span>
+            <span class="c1"># The sub-Expressions are in the order that the keys are sorted.</span>
+            <span class="n">sortedKeys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">curInnerExpr</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">InnerExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span> <span class="o">+</span> <span class="p">[</span><span class="n">sortedKeys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)])</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;The current sub-Expression is not a Composite.&quot;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_getAttrAsInnerExpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_depth</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">attr_expr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Try to find a deeper inner expression that corresponds with the</span>
+<span class="sd">        attribute (attr) of the expression at the given current depth (cur_depth)</span>
+<span class="sd">        along the self InnerExpr.  It will perform a recursive breadth-first</span>
+<span class="sd">        search until it finds a match, making sure the deeper inner expression </span>
+<span class="sd">        corresponds with that specific attribute (not just happening to be the</span>
+<span class="sd">        same sub-expression that could occur multiple places).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">top_level_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cur_inner_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">inner_subs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_inner_expr</span><span class="o">.</span><span class="n">subExprIter</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inner_sub</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">inner_subs</span><span class="p">):</span>
+            <span class="c1"># See if any off the sub-expressions</span>
+            <span class="k">if</span> <span class="n">inner_sub</span> <span class="o">==</span> <span class="n">attr_expr</span><span class="p">:</span>
+                <span class="n">deeper_inner_expr</span> <span class="o">=</span> <span class="n">InnerExpr</span><span class="p">(</span><span class="n">top_level_expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="p">,))</span>       
+                <span class="n">repl_map</span> <span class="o">=</span> <span class="n">deeper_inner_expr</span><span class="o">.</span><span class="n">replMap</span><span class="p">()</span>
+                <span class="n">sub_expr</span> <span class="o">=</span> <span class="n">repl_map</span><span class="o">.</span><span class="n">body</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span><span class="p">[:</span><span class="n">cur_depth</span><span class="p">]:</span>
+                    <span class="n">sub_expr</span> <span class="o">=</span> <span class="n">sub_expr</span><span class="o">.</span><span class="n">subExpr</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">repl_map</span><span class="o">.</span><span class="n">parameterVarSet</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">compositeExpression</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">sub_expr</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span><span class="o">.</span><span class="n">freeVars</span><span class="p">()):</span>
+                    <span class="k">return</span> <span class="n">deeper_inner_expr</span>
+        <span class="c1"># No match found at this depth -- let&#39;s continue to the next depth</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inner_sub</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">inner_subs</span><span class="p">):</span>
+            <span class="n">inner_expr</span> <span class="o">=</span> <span class="n">InnerExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="p">,))</span><span class="o">.</span><span class="n">_getAttrAsInnerExpr</span><span class="p">(</span><span class="n">cur_depth</span><span class="p">,</span>  <span class="n">attr</span><span class="p">,</span> <span class="n">attr_expr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inner_expr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">inner_expr</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="c1"># no match found down to the maximum depth</span>
+        
+        
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        See if the attribute is accessing a deeper inner expression of the </span>
+<span class="sd">        represented inner expression.  If so, return the InnerExpr with the </span>
+<span class="sd">        extended path to the sub-expression.</span>
+<span class="sd">        For methods of the inner expression that beginn as &#39;with&#39;, generate a method </span>
+<span class="sd">        that returns a new version of the top-level expression with the inner expression</span>
+<span class="sd">        changed according to its &#39;with&#39; method.   </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cur_inner_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cur_inner_expr</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;No attribute &#39;</span><span class="si">%s</span><span class="s2">&#39; in &#39;</span><span class="si">%s</span><span class="s2">&#39; or &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">cur_inner_expr</span><span class="o">.</span><span class="vm">__class__</span><span class="p">))</span>
+        
+        <span class="n">inner_attr_val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cur_inner_expr</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_attr_val</span><span class="p">,</span> <span class="n">Expression</span><span class="p">):</span>
+            <span class="c1"># The attribute is addressing a sub-Expression of the current inner Expression</span>
+            <span class="c1"># and may be a sub-sub-Expression (or a member of sub-sub-Expression composite);</span>
+            <span class="c1"># if so, return the SubExprRepl extended to the sub-sub-Expression.</span>
+            <span class="n">inner_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getAttrAsInnerExpr</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span><span class="p">),</span> <span class="n">attr</span><span class="p">,</span> <span class="n">inner_attr_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inner_expr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">inner_expr</span>
+        <span class="k">elif</span> <span class="n">attr</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;with&#39;</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">reviseInnerExpr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="n">cur_sub_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># call the &#39;with...&#39; method on the inner expression:</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">cur_sub_expr</span><span class="p">,</span> <span class="n">attr</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># this will also revise the styles of all parents recursively </span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># return the top-level expression</span>
+            <span class="k">return</span> <span class="n">reviseInnerExpr</span>
+                
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cur_inner_expr</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="c1"># not a sub-expression, so just return the attribute for the actual Expression object of the sub-expression</span>
+        
+<div class="viewcode-block" id="InnerExpr.replMap"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr.replMap">[docs]</a>    <span class="k">def</span> <span class="nf">replMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the lambda function/map that would replace this particular inner</span>
+<span class="sd">        expression within the top-level expression.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># build the lambda expression, starting with the lambda parameter and</span>
+        <span class="c1"># working up the hierarchy.</span>
+        <span class="n">top_level_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cur_sub_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cur_sub_expr</span><span class="p">,</span> <span class="n">Composite</span><span class="p">):</span>
+            <span class="n">dummy_vars</span> <span class="o">=</span> <span class="n">top_level_expr</span><span class="o">.</span><span class="n">safeDummyVars</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cur_sub_expr</span><span class="p">))</span>
+            <span class="n">lambda_params</span> <span class="o">=</span> <span class="n">dummy_vars</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">lambda_body</span> <span class="o">=</span> <span class="n">cur_sub_expr</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_make</span><span class="p">(</span><span class="n">cur_sub_expr</span><span class="o">.</span><span class="n">coreInfo</span><span class="p">(),</span> <span class="n">cur_sub_expr</span><span class="o">.</span><span class="n">getStyles</span><span class="p">(),</span> <span class="n">dummy_vars</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># The replacements should be a function of the parameters encountered</span>
+                <span class="c1"># between the top-level expression and the inner expression.</span>
+                <span class="n">lambda_body</span> <span class="o">=</span> <span class="n">cur_sub_expr</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_make</span><span class="p">(</span><span class="n">cur_sub_expr</span><span class="o">.</span><span class="n">coreInfo</span><span class="p">(),</span> <span class="n">cur_sub_expr</span><span class="o">.</span><span class="n">getStyles</span><span class="p">(),</span> <span class="p">[</span><span class="n">Function</span><span class="p">(</span><span class="n">dummy_var</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="k">for</span> <span class="n">dummy_var</span> <span class="ow">in</span> <span class="n">dummy_vars</span><span class="p">])</span>                
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lambda_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">top_level_expr</span><span class="o">.</span><span class="n">safeDummyVar</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">lambda_body</span> <span class="o">=</span> <span class="n">lambda_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># The replacements should be a function of the parameters encountered</span>
+                <span class="c1"># between the top-level expression and the inner expression.</span>
+                <span class="n">lambda_body</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">lambda_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">expr</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">innerExprPath</span><span class="p">))):</span>
+            <span class="n">expr_subs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">subExprIter</span><span class="p">())</span>
+            <span class="n">lambda_body</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_make</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">coreInfo</span><span class="p">(),</span> <span class="n">expr</span><span class="o">.</span><span class="n">getStyles</span><span class="p">(),</span> <span class="n">expr_subs</span><span class="p">[:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lambda_body</span><span class="p">]</span> <span class="o">+</span> <span class="n">expr_subs</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">return</span> <span class="n">Lambda</span><span class="p">(</span><span class="n">lambda_params</span><span class="p">,</span> <span class="n">lambda_body</span><span class="p">)</span></div>
+    
+    <span class="k">def</span> <span class="nf">_expr_rep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Representation as NamedExprs that indicates not only the lambda function</span>
+<span class="sd">        but the sub-Expressions that may be accessed more deeply.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">repl_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replMap</span><span class="p">()</span>
+        <span class="n">lambda_params</span> <span class="o">=</span> <span class="n">repl_map</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="n">cur_sub_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprHierarchy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cur_sub_expr</span><span class="p">,</span> <span class="n">Composite</span><span class="p">):</span>
+            <span class="n">sub_exprs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_sub_expr</span><span class="o">.</span><span class="n">subExprIter</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sub_exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">cur_sub_expr</span><span class="p">]</span>
+        <span class="n">named_expr_dict</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;lambda&#39;</span><span class="p">,</span><span class="n">repl_map</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">named_expr_dict</span> <span class="o">+=</span> <span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">lambda_param</span><span class="p">),</span> <span class="n">sub_expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">lambda_param</span><span class="p">,</span> <span class="n">sub_expr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lambda_params</span><span class="p">,</span> <span class="n">sub_exprs</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">named_expr_dict</span> <span class="o">+=</span> <span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">lambda_param</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)),</span> <span class="n">sub_expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">lambda_param</span><span class="p">,</span> <span class="n">sub_expr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lambda_params</span><span class="p">,</span> <span class="n">sub_exprs</span><span class="p">)]</span>            
+        <span class="k">return</span> <span class="n">NamedExprs</span><span class="p">(</span><span class="n">named_expr_dict</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="InnerExpr.simplification"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr.simplification">[docs]</a>    <span class="k">def</span> <span class="nf">simplification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">defaultSimplification</span>
+        <span class="k">return</span> <span class="n">defaultSimplification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>        </div>
+
+<div class="viewcode-block" id="InnerExpr.simplify"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr.simplify">[docs]</a>    <span class="k">def</span> <span class="nf">simplify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">defaultSimplification</span>
+        <span class="k">return</span> <span class="n">defaultSimplification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>        </div>
+    
+<div class="viewcode-block" id="InnerExpr.simplifyOperands"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr.simplifyOperands">[docs]</a>    <span class="k">def</span> <span class="nf">simplifyOperands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">defaultSimplification</span>
+        <span class="k">return</span> <span class="n">defaultSimplification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">operandsOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>                </div>
+                
+<div class="viewcode-block" id="InnerExpr.evaluation"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr.evaluation">[docs]</a>    <span class="k">def</span> <span class="nf">evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">defaultSimplification</span>
+        <span class="k">return</span> <span class="n">defaultSimplification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mustEvaluate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>        </div>
+
+<div class="viewcode-block" id="InnerExpr.evaluate"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">defaultSimplification</span>
+        <span class="k">return</span> <span class="n">defaultSimplification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mustEvaluate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>        </div>
+
+<div class="viewcode-block" id="InnerExpr.evaluateOperands"><a class="viewcode-back" href="../../../../api/proveit.InnerExpr.html#proveit.InnerExpr.evaluateOperands">[docs]</a>    <span class="k">def</span> <span class="nf">evaluateOperands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">defaultSimplification</span>
+        <span class="k">return</span> <span class="n">defaultSimplification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mustEvaluate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">operandsOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>                </div>
+        
+    <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_rep</span><span class="p">()</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_rep</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">Prove-It</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.asExpression.html">asExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.asExpressions.html">asExpressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.compositeExpression.html">compositeExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.expressionDepth.html">expressionDepth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.maybeFenced.html">maybeFenced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.maybeFencedLatex.html">maybeFencedLatex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.maybeFencedString.html">maybeFencedString</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.reset.html">reset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.safeDefaultOrDummyVar.html">safeDefaultOrDummyVar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.safeDummyVar.html">safeDummyVar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.singleOrCompositeExpression.html">singleOrCompositeExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.varIter.html">varIter</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Assumption.html">Assumption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Axiom.html">Axiom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Composite.html">Composite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Context.html">Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ContextException.html">ContextException</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.DuplicateLiteralError.html">DuplicateLiteralError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ExprList.html">ExprList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ExprListError.html">ExprListError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ExprTensor.html">ExprTensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Expression.html">Expression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Function.html">Function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Generalization.html">Generalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.GeneralizationFailure.html">GeneralizationFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.HypotheticalReasoning.html">HypotheticalReasoning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ImproperRelabeling.html">ImproperRelabeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ImproperSubstitution.html">ImproperSubstitution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Indexed.html">Indexed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.IndexedError.html">IndexedError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.InnerExpr.html">InnerExpr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.InvalidAssumptions.html">InvalidAssumptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Iter.html">Iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.KnownTruth.html">KnownTruth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Label.html">Label</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Lambda.html">Lambda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.LambdaError.html">LambdaError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Literal.html">Literal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.MakeNotImplemented.html">MakeNotImplemented</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ModusPonens.html">ModusPonens</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ModusPonensFailure.html">ModusPonensFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.NamedExprs.html">NamedExprs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Operation.html">Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.OperationError.html">OperationError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.OperationOverInstances.html">OperationOverInstances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.OperationSequence.html">OperationSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ParameterExtractionError.html">ParameterExtractionError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Proof.html">Proof</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ProofFailure.html">ProofFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.RelabelingFailure.html">RelabelingFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.ScopingViolation.html">ScopingViolation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Specialization.html">Specialization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.SpecializationFailure.html">SpecializationFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.StyleOptions.html">StyleOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Theorem.html">Theorem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.TransitiveRelation.html">TransitiveRelation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.TransitiveSequence.html">TransitiveSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.Variable.html">Variable</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.compose.html">compose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.concludeViaImplication.html">concludeViaImplication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.defaultSimplification.html">defaultSimplification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.evaluateTruth.html">evaluateTruth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.inBool.html">inBool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.isIrreducibleValue.html">isIrreducibleValue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.reduceOperands.html">reduceOperands</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.And.html">And</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Card.html">Card</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Difference.html">Difference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Disjoint.html">Disjoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Distinct.html">Distinct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Equals.html">Equals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.EvaluationError.html">EvaluationError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Exists.html">Exists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Forall.html">Forall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Iff.html">Iff</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Implies.html">Implies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.InSet.html">InSet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Intersect.html">Intersect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.IrreducibleValue.html">IrreducibleValue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Membership.html">Membership</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Nonmembership.html">Nonmembership</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Not.html">Not</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.NotEquals.html">NotEquals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.NotExists.html">NotExists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.NotInSet.html">NotInSet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.NotSubsetEq.html">NotSubsetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.NotSupersetEq.html">NotSupersetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Or.html">Or</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Set.html">Set</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.SetOfAll.html">SetOfAll</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Subset.html">Subset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.SubsetEq.html">SubsetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Superset.html">Superset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.SupersetEq.html">SupersetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.logic.Union.html">Union</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Frac.html">Frac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.GreaterEqOnlySeq.html">GreaterEqOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.GreaterOnlySeq.html">GreaterOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.LessEqOnlySeq.html">LessEqOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.LessOnlySeq.html">LessOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.greaterSequence.html">greaterSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.isLiteralInt.html">isLiteralInt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.lesserSequence.html">lesserSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.num.html">num</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Abs.html">Abs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Add.html">Add</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Ceil.html">Ceil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.DecimalSequence.html">DecimalSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Div.html">Div</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Exp.html">Exp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Floor.html">Floor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Greater.html">Greater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.GreaterEq.html">GreaterEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.GreaterSequence.html">GreaterSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Integrate.html">Integrate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.IntervalCC.html">IntervalCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.IntervalCO.html">IntervalCO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.IntervalOC.html">IntervalOC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.IntervalOO.html">IntervalOO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Len.html">Len</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Less.html">Less</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.LessEq.html">LessEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.LesserSequence.html">LesserSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Max.html">Max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Min.html">Min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Mod.html">Mod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.ModAbs.html">ModAbs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Mult.html">Mult</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Neg.html">Neg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Numeral.html">Numeral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.RealInterval.html">RealInterval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Round.html">Round</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Sqrt.html">Sqrt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Subtract.html">Subtract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/proveit.number.Sum.html">Sum</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  <li><a href="../../../proveit.html">proveit</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Wayne Witzel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

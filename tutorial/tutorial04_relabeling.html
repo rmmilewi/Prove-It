@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" />
+<title>Chapter 4. Relabeling</title>
+
+<style type="text/css">
+/* Overrides of notebook CSS for static HTML export */
+body {
+  overflow: visible;
+  padding: 8px;
+}
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  } 
+  div.output_wrapper { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+  div.output { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+}
+</style>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="notebook.css">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+</script></head>
+<body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
+    <a href="../index.html"><img src="../pv_it.png" alt="logo" style="width:50px;float:left;position:absolute"></a> 
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Chapter-4.-Relabeling">Chapter 4. Relabeling<a class="anchor-link" href="#Chapter-4.-Relabeling">&#182;</a></h1><p>Recall that <strong>Variable</strong>s in <strong>Prove-It</strong> are arbitrary labels that are interchangeable. In <code>tutorial_01_core_expr</code>, we demonstrated using the <code>relabeled</code> method of <strong>Expression</strong> to transform an expression to one with <strong>Variable</strong>s swapped for other <strong>Variable</strong>s.  This was, however, only a transformation of the expression with no proof implication.  Here we will discuss the <em>relabeling</em> derivation step in which we can derive a new <strong>KnownTruth</strong> from an existing <strong>KnownTruth</strong> by swapping <strong>Variable</strong>s for other <strong>Variable</strong>s.</p>
+<h2 id="Attempting-to-relabel-a-free-Variable-of-an-assumption">Attempting to relabel a free Variable of an assumption<a class="anchor-link" href="#Attempting-to-relabel-a-free-Variable-of-an-assumption">&#182;</a></h2><p>Let us take an example from the previous tutorial chapter:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span>
+<span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">Implies</span>
+<span class="o">%</span><span class="k">begin</span> relabeling
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_impl_B</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[2]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="A_impl_B">A_impl_B:</strong> <a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">B_from_A</span> <span class="o">=</span> <span class="n">A_impl_B</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">{</span><span class="n">A</span><span class="p">,</span> <span class="n">A_impl_B</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[3]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="B_from_A">B_from_A:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/a2e36143adb5c3bd3253747e981635e079c2ab500/expr.html"><img src="__pv_it/a2e36143adb5c3bd3253747e981635e079c2ab500/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we will attempt to perform a relabeling derivation step by calling the <code>relabel</code> method on a <strong>KnownTruth</strong>.  This will not work because we are not allowed to relabel a <strong>Variable</strong> in the list of assumptions.  Otherwise we would end up being able to prove false statements (unless we relabeled the assumptions in a consistent manner, but <strong>Prove-It</strong> has a different mechanism for doing this as we shall see next).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">RelabelingFailure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">B_from_A</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">B</span><span class="p">:</span><span class="n">C</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an RelabelingFailure error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">RelabelingFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Proof step failed assuming {A =&gt; B, A}: Attempting to relabel variable(s) that are free in the assumptions: {B}
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Basic-relabeling">Basic relabeling<a class="anchor-link" href="#Basic-relabeling">&#182;</a></h2><p>If we convert the assumptions to explicit hypotheses first, then we can do the relabeling that we failed to do before.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">explicit_B_from_A</span> <span class="o">=</span> <span class="n">B_from_A</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">A_impl_B</span><span class="p">)</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[5]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="explicit_B_from_A">explicit_B_from_A:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/9664e16d4e603eda486e2dcc84584c0b1747fff00/expr.html"><img src="__pv_it/9664e16d4e603eda486e2dcc84584c0b1747fff00/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is a true statement that requires no assumptions.  This statement is valid for any value of $A$ and $B$ according to the rule that an implication is true as long as the conclusion is true whenever the hypothesis is true (but otherwise being indifferent to truth-aptness).  Now we will relabel $B$ to $C$ by calling <strong>KnownTruth</strong>'s <code>relabel</code> method.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">explicit_C_from_A</span> <span class="o">=</span> <span class="n">explicit_B_from_A</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">B</span><span class="p">:</span><span class="n">C</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[6]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="explicit_C_from_A">explicit_C_from_A:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/5d066b98939e0d1f8ed903b4728249ea4e6920580/expr.html"><img src="__pv_it/5d066b98939e0d1f8ed903b4728249ea4e6920580/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here is the full proof:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">explicit_C_from_A</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[7]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>relabeling</td><td>1</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/5d066b98939e0d1f8ed903b4728249ea4e6920580/expr.html"><img src="__pv_it/5d066b98939e0d1f8ed903b4728249ea4e6920580/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>1</td><td>hypothetical reasoning</td><td>2</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/9664e16d4e603eda486e2dcc84584c0b1747fff00/expr.html"><img src="__pv_it/9664e16d4e603eda486e2dcc84584c0b1747fff00/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>hypothetical reasoning</td><td>3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/25e4440aa57c7bfc46ec2daf3980295fc0375a430/expr.html"><img src="__pv_it/25e4440aa57c7bfc46ec2daf3980295fc0375a430/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>modus ponens</td><td>4, 5</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/a2e36143adb5c3bd3253747e981635e079c2ab500/expr.html"><img src="__pv_it/a2e36143adb5c3bd3253747e981635e079c2ab500/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>4</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.html"><img src="__pv_it/9654b2deb52acc32c7e7f9ddb0ac7acafab7fd220/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.html"><img src="__pv_it/74709aae353dd47ed1086aae7a6650599fd919cf0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note, however, that a <strong>Variable</strong> may only be relabeled to another <strong>Variable</strong>.  To do anything else, <em>specialization</em> would be required.  We will discuss <em>specialization</em> in the next tutorial chapter.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">And</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">explicit_B_from_A</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">B</span><span class="p">:</span><span class="n">And</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">)})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an RelabelingFailure error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">RelabelingFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Proof step failed: May only relabel a Variable to a Variable.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Simultaneous-relabeling">Simultaneous relabeling<a class="anchor-link" href="#Simultaneous-relabeling">&#182;</a></h2><p>Relabeling will occur simultaneously in a consistent manner.  For example, we can switch labels.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">explicit_B_from_A</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">A</span><span class="p">:</span><span class="n">B</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span><span class="n">A</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[9]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/adbd90f22d46b6ff95dc06d0293af1f441ebce2a0/expr.html"><img src="__pv_it/adbd90f22d46b6ff95dc06d0293af1f441ebce2a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us try a case with three labels that we will cycle.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nestedImpl</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Implies</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[10]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="nestedImpl">nestedImpl:</strong> <a class="ProveItLink" href="__pv_it/9488ee792e0b5d7105f5afbdb46e950ac1fc8c330/expr.html"><img src="__pv_it/9488ee792e0b5d7105f5afbdb46e950ac1fc8c330/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CfromNestedImpl</span> <span class="o">=</span> <span class="n">nestedImpl</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">([</span><span class="n">nestedImpl</span><span class="p">,</span> <span class="n">A</span><span class="p">])</span><span class="o">.</span><span class="n">deriveConsequent</span><span class="p">([</span><span class="n">nestedImpl</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[11]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="CfromNestedImpl">CfromNestedImpl:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/6ead5107cfaaf8790db35e84ec4393a9b1cd356e0/expr.html"><img src="__pv_it/6ead5107cfaaf8790db35e84ec4393a9b1cd356e0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cascadingImpl</span> <span class="o">=</span> <span class="n">CfromNestedImpl</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">nestedImpl</span><span class="p">)</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">asImplication</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[12]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="cascadingImpl">cascadingImpl:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/afa1c0e6d0abb4443a94b8664b10b511ae8a03110/expr.html"><img src="__pv_it/afa1c0e6d0abb4443a94b8664b10b511ae8a03110/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Convincing yourself that this is correct is left as an exercise to the reader (you could make a truth table and/or check the logic that got us to this point).  In any case, now we will demonstrate cyclic relabeling.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">relabeledCascadingImpl</span> <span class="o">=</span> <span class="n">cascadingImpl</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">A</span><span class="p">:</span><span class="n">B</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span><span class="n">C</span><span class="p">,</span> <span class="n">C</span><span class="p">:</span><span class="n">A</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[13]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="relabeledCascadingImpl">relabeledCascadingImpl:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/96888aef4fe0321f02ec9e0fbc807282503d81af0/expr.html"><img src="__pv_it/96888aef4fe0321f02ec9e0fbc807282503d81af0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us look at this proof:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">relabeledCascadingImpl</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[14]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>relabeling</td><td>1</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/96888aef4fe0321f02ec9e0fbc807282503d81af0/expr.html"><img src="__pv_it/96888aef4fe0321f02ec9e0fbc807282503d81af0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a>, <a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>1</td><td>hypothetical reasoning</td><td>2</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/afa1c0e6d0abb4443a94b8664b10b511ae8a03110/expr.html"><img src="__pv_it/afa1c0e6d0abb4443a94b8664b10b511ae8a03110/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>hypothetical reasoning</td><td>3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/76075210eb78ca55aac33dc62ad5dcb364c5dc700/expr.html"><img src="__pv_it/76075210eb78ca55aac33dc62ad5dcb364c5dc700/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>hypothetical reasoning</td><td>4</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/5cd9b33b88e1a628ed00ab113cff428eab1aa3cc0/expr.html"><img src="__pv_it/5cd9b33b88e1a628ed00ab113cff428eab1aa3cc0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/1d467b424f18c70fb33e47756e595dbfcf5161820/expr.html"><img src="__pv_it/1d467b424f18c70fb33e47756e595dbfcf5161820/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>4</td><td>modus ponens</td><td>5, 6</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/6ead5107cfaaf8790db35e84ec4393a9b1cd356e0/expr.html"><img src="__pv_it/6ead5107cfaaf8790db35e84ec4393a9b1cd356e0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>modus ponens</td><td>7, 8</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/52bd2565e36c49449a6974c5da771dd21e90d03e0/expr.html"><img src="__pv_it/52bd2565e36c49449a6974c5da771dd21e90d03e0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.html"><img src="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>6</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/1612ee39be24e00576045a5f0471ba42a9eab2970/expr.html"><img src="__pv_it/1612ee39be24e00576045a5f0471ba42a9eab2970/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>7</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/83f8c6ae742b1055ddd92b2e3844fde6f3c7726c0/expr.html"><img src="__pv_it/83f8c6ae742b1055ddd92b2e3844fde6f3c7726c0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/9488ee792e0b5d7105f5afbdb46e950ac1fc8c330/expr.html"><img src="__pv_it/9488ee792e0b5d7105f5afbdb46e950ac1fc8c330/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>8</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Duplicated-relabeling">Duplicated relabeling<a class="anchor-link" href="#Duplicated-relabeling">&#182;</a></h2><p>It is possible to relabel multiple <strong>Variable</strong>s to the same <strong>Variable</strong> to derive a <strong>KnownTruth</strong> that is weaker than the original statement.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">redundantCascadingImpl</span> <span class="o">=</span> <span class="n">cascadingImpl</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">A</span><span class="p">:</span><span class="n">B</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[15]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="redundantCascadingImpl">redundantCascadingImpl:</strong> <span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/cd0c787fb7a0b3b371c668e4d0994c9d3f603f940/expr.html"><img src="__pv_it/cd0c787fb7a0b3b371c668e4d0994c9d3f603f940/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">redundantCascadingImpl</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[16]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>relabeling</td><td>1</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/cd0c787fb7a0b3b371c668e4d0994c9d3f603f940/expr.html"><img src="__pv_it/cd0c787fb7a0b3b371c668e4d0994c9d3f603f940/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style="text-align:left"><span style="font-size:20px;"><a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a> : <a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr><tr><td>1</td><td>hypothetical reasoning</td><td>2</td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/afa1c0e6d0abb4443a94b8664b10b511ae8a03110/expr.html"><img src="__pv_it/afa1c0e6d0abb4443a94b8664b10b511ae8a03110/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>2</td><td>hypothetical reasoning</td><td>3</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/76075210eb78ca55aac33dc62ad5dcb364c5dc700/expr.html"><img src="__pv_it/76075210eb78ca55aac33dc62ad5dcb364c5dc700/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>3</td><td>hypothetical reasoning</td><td>4</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/5cd9b33b88e1a628ed00ab113cff428eab1aa3cc0/expr.html"><img src="__pv_it/5cd9b33b88e1a628ed00ab113cff428eab1aa3cc0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/1d467b424f18c70fb33e47756e595dbfcf5161820/expr.html"><img src="__pv_it/1d467b424f18c70fb33e47756e595dbfcf5161820/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>4</td><td>modus ponens</td><td>5, 6</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/6ead5107cfaaf8790db35e84ec4393a9b1cd356e0/expr.html"><img src="__pv_it/6ead5107cfaaf8790db35e84ec4393a9b1cd356e0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.html"><img src="../packages/proveit/__pv_it/985a1bdf1540838275dec15f4ad6de261cca93ce0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>5</td><td>modus ponens</td><td>7, 8</td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/52bd2565e36c49449a6974c5da771dd21e90d03e0/expr.html"><img src="__pv_it/52bd2565e36c49449a6974c5da771dd21e90d03e0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.html"><img src="__pv_it/318ec56dfe326b491d8f5311d25e366580d46fdd0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>6</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/1612ee39be24e00576045a5f0471ba42a9eab2970/expr.html"><img src="__pv_it/1612ee39be24e00576045a5f0471ba42a9eab2970/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.html"><img src="../packages/proveit/__pv_it/077b2ff79244fb4582cbe22c6e3356fa92a52f2f0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>7</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/83f8c6ae742b1055ddd92b2e3844fde6f3c7726c0/expr.html"><img src="__pv_it/83f8c6ae742b1055ddd92b2e3844fde6f3c7726c0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/9488ee792e0b5d7105f5afbdb46e950ac1fc8c330/expr.html"><img src="__pv_it/9488ee792e0b5d7105f5afbdb46e950ac1fc8c330/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>8</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.html"><img src="__pv_it/158bdc91074824c720728a23dba5d58593c8cc480/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.html"><img src="../packages/proveit/__pv_it/2cbe72a7ad6f655694dd697106680215e8489b600/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Literals-cannot-be-relabeled">Literals cannot be relabeled<a class="anchor-link" href="#Literals-cannot-be-relabeled">&#182;</a></h2><p>We saw that <strong>Literals</strong> cannot be relabeled in <em>expression relabeling</em> in the <a href="tutorial01_basic_expr.ipynb">basic expressions chapter</a>.  Let us revisit this and verify that we cannot perform a relabeling derivation step.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Literal</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">),</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[17]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="X">X:</strong> <a class="ProveItLink" href="__pv_it/6e1b408243d9b1d364bd9ad249c1e854d92ba3a50/expr.html"><img src="__pv_it/6e1b408243d9b1d364bd9ad249c1e854d92ba3a50/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+<strong id="Y">Y:</strong> <a class="ProveItLink" href="__pv_it/6cc660794416efade8d57c502e2b99e8c6a1df6d0/expr.html"><img src="__pv_it/6cc660794416efade8d57c502e2b99e8c6a1df6d0/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+<strong id="Z">Z:</strong> <a class="ProveItLink" href="__pv_it/01fa066582b7adbef724608a37ea3a7e68200f710/expr.html"><img src="__pv_it/01fa066582b7adbef724608a37ea3a7e68200f710/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">XYZimpl</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Implies</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[18]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="XYZimpl">XYZimpl:</strong> <a class="ProveItLink" href="__pv_it/132a69527fa96b17292d0263cb7e2bee6841dd190/expr.html"><img src="__pv_it/132a69527fa96b17292d0263cb7e2bee6841dd190/expr.png" style="display:inline;vertical-align:middle;" /></a><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us try to relabel this.  Our first mistake will be that the expression is not a <strong>KnownTruth</strong>.  <strong>Expression</strong> has a <code>relabeled</code> method, but to call <code>relabel</code> (and make an actual derivation step), we need to start with a <strong>KnownTruth</strong>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">RelabelingFailure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">XYZimpl</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">Y</span><span class="p">:</span><span class="n">C</span><span class="p">})</span>
+<span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: &#39;Implies&#39; object has no attribute &#39;relabel&#39;
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us make this an axiom to make it a <strong>KnownTruth</strong> by fiat.  This is not normally how axioms are created, but we will get into that in a later tutorial chapter</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">Axiom</span><span class="p">,</span> <span class="n">Context</span>
+<span class="n">XYZimplAxiom</span> <span class="o">=</span> <span class="n">Axiom</span><span class="p">(</span><span class="n">XYZimpl</span><span class="p">,</span> <span class="n">Context</span><span class="p">(),</span> <span class="s1">&#39;XYZimplAxiom&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[20]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="XYZimplAxiom">XYZimplAxiom:</strong> <table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>axiom</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/132a69527fa96b17292d0263cb7e2bee6841dd190/expr.html"><img src="__pv_it/132a69527fa96b17292d0263cb7e2bee6841dd190/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="_axioms_.html#XYZimplAxiom">tutorial.XYZimplAxiom</a></td></tr></table><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we will try to <code>relabel</code>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">RelabelingFailure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">XYZimplAxiom</span><span class="o">.</span><span class="n">provenTruth</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">Y</span><span class="p">:</span><span class="n">C</span><span class="p">})</span>
+<span class="k">except</span> <span class="n">RelabelingFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Proof step failed: May only relabel a Variable
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>That time, we got the error message that only <strong>Variable</strong>s may be relabeled.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Scoping-violation">Scoping violation<a class="anchor-link" href="#Scoping-violation">&#182;</a></h2><p>We also noted with <em>expression relabeling</em> in <a href="tutorial01_basic_expr.ipynb">basic expressions chapter</a> that we are not allowed to violate the scoping restrictions of <strong>Lambda</strong> expressions.  We revisit this for the case of the <em>relabeling</em> derivation step.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For our examples, we will invoke the infinite geometic series theorem from <code>proveit.number.summation</code>:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit.number.summation._theorems_</span> <span class="k">import</span> <span class="n">infGeomSum</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">infGeomSum</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[23]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/number/summation/__pv_it/c1eed1587f390ad0a618fce14907c4238d599e750/expr.html"><img src="../packages/proveit/number/summation/__pv_it/c1eed1587f390ad0a618fce14907c4238d599e750/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us look how this expression is deconstructed in the expression information.  Note the use of <strong>Lambda</strong> mappings for the <code>Forall</code> <em>instance expression</em> (entry 2 below) and the <code>Sum</code> <em>summand</em> (entry 12 below).  These <strong>Lambda</strong> mappings define new scopes for $x$ and $m$ respectively.  This concept of operating on a <strong>lambda</strong> map will be discussed more in the next chapter.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">infGeomSum</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[24]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operand:&nbsp;2<br></td><td><a class="ProveItLink" href="../packages/proveit/number/summation/__pv_it/c1eed1587f390ad0a618fce14907c4238d599e750/expr.html"><img src="../packages/proveit/number/summation/__pv_it/c1eed1587f390ad0a618fce14907c4238d599e750/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>1</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/logic/boolean/quantification/universal/__pv_it/265f8c02ac1094d56e0e6410a1c1fd3500dc9f540/expr.html"><img src="../packages/proveit/logic/boolean/quantification/universal/__pv_it/265f8c02ac1094d56e0e6410a1c1fd3500dc9f540/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>2</td><td>Lambda</td><td>parameter:&nbsp;27<br>body:&nbsp;3<br>conditions:&nbsp;4<br></td><td><a class="ProveItLink" href="__pv_it/5f9d9dc11b89a066e3f50bcf01323e95337cede90/expr.html"><img src="__pv_it/5f9d9dc11b89a066e3f50bcf01323e95337cede90/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>3</td><td>Operation</td><td>operator:&nbsp;5<br>operands:&nbsp;6<br></td><td><a class="ProveItLink" href="__pv_it/7d5baa1e8e635dffed186db46cb19d6ad3b6abdc0/expr.html"><img src="__pv_it/7d5baa1e8e635dffed186db46cb19d6ad3b6abdc0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>4</td><td>ExprList</td><td>7</td><td><a class="ProveItLink" href="__pv_it/02600a40e8387f0e9b9ac8b68849d0b79892d25a0/expr.html"><img src="__pv_it/02600a40e8387f0e9b9ac8b68849d0b79892d25a0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>5</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/logic/equality/__pv_it/2fb26078095930560931daa0500ce419a39ea6cd0/expr.html"><img src="../packages/proveit/logic/equality/__pv_it/2fb26078095930560931daa0500ce419a39ea6cd0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>6</td><td>ExprList</td><td>8, 9</td><td><a class="ProveItLink" href="__pv_it/9925428c73f3cf6a97da0bc09940695da78d2b640/expr.html"><img src="__pv_it/9925428c73f3cf6a97da0bc09940695da78d2b640/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>7</td><td>Operation</td><td>operator:&nbsp;24<br>operands:&nbsp;10<br></td><td><a class="ProveItLink" href="__pv_it/5c60ad8ec27d814114e4daf357da6bc586e6941f0/expr.html"><img src="__pv_it/5c60ad8ec27d814114e4daf357da6bc586e6941f0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>8</td><td>Operation</td><td>operator:&nbsp;11<br>operand:&nbsp;12<br></td><td><a class="ProveItLink" href="__pv_it/b42f5e04f6e248a349d97b62d6e6d9a23547c12f0/expr.html"><img src="__pv_it/b42f5e04f6e248a349d97b62d6e6d9a23547c12f0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>9</td><td>Operation</td><td>operator:&nbsp;13<br>operands:&nbsp;14<br></td><td><a class="ProveItLink" href="__pv_it/95dde3fd4f51a831d555bfd54dbbde170c35e8330/expr.html"><img src="__pv_it/95dde3fd4f51a831d555bfd54dbbde170c35e8330/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>10</td><td>ExprList</td><td>27, 15</td><td><a class="ProveItLink" href="__pv_it/3cc22ed4b06d8862c71f572e1902cae2f397d5050/expr.html"><img src="__pv_it/3cc22ed4b06d8862c71f572e1902cae2f397d5050/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>11</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/summation/__pv_it/0a16045c678b35f122c8085ab544f65a80626c0a0/expr.html"><img src="../packages/proveit/number/summation/__pv_it/0a16045c678b35f122c8085ab544f65a80626c0a0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>12</td><td>Lambda</td><td>parameter:&nbsp;28<br>body:&nbsp;16<br>conditions:&nbsp;17<br></td><td><a class="ProveItLink" href="__pv_it/3dfd73f02326fa65b434b0da92f7928174b46a330/expr.html"><img src="__pv_it/3dfd73f02326fa65b434b0da92f7928174b46a330/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>13</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/division/__pv_it/089f5ca61fe425d4f6ef7efa2138c1a2fa47180c0/expr.html"><img src="../packages/proveit/number/division/__pv_it/089f5ca61fe425d4f6ef7efa2138c1a2fa47180c0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>14</td><td>ExprList</td><td>26, 18</td><td><a class="ProveItLink" href="__pv_it/1a2a1c148bc9bb8cff1c4c81cdd5325bc6efede60/expr.html"><img src="__pv_it/1a2a1c148bc9bb8cff1c4c81cdd5325bc6efede60/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>15</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/sets/complex/__pv_it/c357845f93a5a2d9f649129d299e7ec28dda4b960/expr.html"><img src="../packages/proveit/number/sets/complex/__pv_it/c357845f93a5a2d9f649129d299e7ec28dda4b960/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>16</td><td>Operation</td><td>operator:&nbsp;19<br>operands:&nbsp;20<br></td><td><a class="ProveItLink" href="__pv_it/886ee3e28a191f18e6e8cc904d1893467290ddcf0/expr.html"><img src="__pv_it/886ee3e28a191f18e6e8cc904d1893467290ddcf0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>17</td><td>ExprList</td><td>21</td><td><a class="ProveItLink" href="__pv_it/0ca3e352532fa3e98f53fc80f72c2c8cc0e1d2c00/expr.html"><img src="__pv_it/0ca3e352532fa3e98f53fc80f72c2c8cc0e1d2c00/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>18</td><td>Operation</td><td>operator:&nbsp;22<br>operands:&nbsp;23<br></td><td><a class="ProveItLink" href="__pv_it/b5e15f5164530c86c391d8d0a96d05e8ad65e1710/expr.html"><img src="__pv_it/b5e15f5164530c86c391d8d0a96d05e8ad65e1710/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>19</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/exponentiation/__pv_it/deb2bf23cbccdd6e6791e1b35b5b9794ce12dbd50/expr.html"><img src="../packages/proveit/number/exponentiation/__pv_it/deb2bf23cbccdd6e6791e1b35b5b9794ce12dbd50/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>20</td><td>ExprList</td><td>27, 28</td><td><a class="ProveItLink" href="__pv_it/f2b5fc3540d31286926c9195258165a9fb5254840/expr.html"><img src="__pv_it/f2b5fc3540d31286926c9195258165a9fb5254840/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>21</td><td>Operation</td><td>operator:&nbsp;24<br>operands:&nbsp;25<br></td><td><a class="ProveItLink" href="__pv_it/9b588a851be939a6c5368d50a6c0a531b4fed56e0/expr.html"><img src="__pv_it/9b588a851be939a6c5368d50a6c0a531b4fed56e0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>22</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/subtraction/__pv_it/03194771b14a60816113e61ba63a976d1ba784d70/expr.html"><img src="../packages/proveit/number/subtraction/__pv_it/03194771b14a60816113e61ba63a976d1ba784d70/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>23</td><td>ExprList</td><td>26, 27</td><td><a class="ProveItLink" href="__pv_it/caaa7e4c422ef0a1cb986c4acf50e1ba9b1ced2d0/expr.html"><img src="__pv_it/caaa7e4c422ef0a1cb986c4acf50e1ba9b1ced2d0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>24</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/logic/set_theory/membership/__pv_it/088cbc857536a28d4119ad9639a84270ccb0545d0/expr.html"><img src="../packages/proveit/logic/set_theory/membership/__pv_it/088cbc857536a28d4119ad9639a84270ccb0545d0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>25</td><td>ExprList</td><td>28, 29</td><td><a class="ProveItLink" href="__pv_it/1698d6bbebf04149fb67ff2d5ff63f777a912dcd0/expr.html"><img src="__pv_it/1698d6bbebf04149fb67ff2d5ff63f777a912dcd0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>26</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/numeral/__pv_it/9be8badea4c35b9724062cecc501d17a3158d1d20/expr.html"><img src="../packages/proveit/number/numeral/__pv_it/9be8badea4c35b9724062cecc501d17a3158d1d20/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>27</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="../packages/proveit/__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>28</td><td>Variable</td><td></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/78af03acba5349fd70398a32ce59bae1da52f0870/expr.html"><img src="../packages/proveit/__pv_it/78af03acba5349fd70398a32ce59bae1da52f0870/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>29</td><td>Operation</td><td>operator:&nbsp;30<br>operands:&nbsp;31<br></td><td><a class="ProveItLink" href="__pv_it/891707711a255fe9653cf66f7877333f97ee63d40/expr.html"><img src="__pv_it/891707711a255fe9653cf66f7877333f97ee63d40/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>30</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/sets/integer/__pv_it/6e5362d7b256561b61a1b512bf7dc507dcde5dcf0/expr.html"><img src="../packages/proveit/number/sets/integer/__pv_it/6e5362d7b256561b61a1b512bf7dc507dcde5dcf0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>31</td><td>ExprList</td><td>32, 33</td><td><a class="ProveItLink" href="__pv_it/8f0d1ab5a4a90210654735ae66dae40d5c9998720/expr.html"><img src="__pv_it/8f0d1ab5a4a90210654735ae66dae40d5c9998720/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>32</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/numeral/__pv_it/ec23fc7a1b4222a5f4948b495002b97d6fa18c3c0/expr.html"><img src="../packages/proveit/number/numeral/__pv_it/ec23fc7a1b4222a5f4948b495002b97d6fa18c3c0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>33</td><td>Literal</td><td></td><td><a class="ProveItLink" href="../packages/proveit/number/sets/integer/__pv_it/fb164099ff695e5f06bcf7426355186a1c63cc390/expr.html"><img src="../packages/proveit/number/sets/integer/__pv_it/fb164099ff695e5f06bcf7426355186a1c63cc390/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we will use relabeling on the geometric series theorem to prove that we can write it in terms of $a$ and $n$ instead of $x$ and $m$.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">x</span>
+<span class="n">infGeomSum</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">a</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span><span class="n">n</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[25]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/b7cbae06ff085adc59bcce34575d9f190b0589d70/expr.html"><img src="__pv_it/b7cbae06ff085adc59bcce34575d9f190b0589d70/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can also swap the labels.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">infGeomSum</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span><span class="n">x</span><span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[26]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="__pv_it/c1bff46e490137207a78349421f5e62ae4fff3760/expr.html"><img src="__pv_it/c1bff46e490137207a78349421f5e62ae4fff3760/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">infGeomSum</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span><span class="n">x</span><span class="p">})</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[27]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>theorem</td><td></td><td><span style="font-size:20px;"> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/number/summation/__pv_it/c1eed1587f390ad0a618fce14907c4238d599e750/expr.html"><img src="../packages/proveit/number/summation/__pv_it/c1eed1587f390ad0a618fce14907c4238d599e750/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+<tr><td>&nbsp;</td><td colspan=4 style-"text-align:left"><a class="ProveItLink" href="../packages/proveit/number/summation/_proofs_/infGeomSum.html">proveit.number.summation.infGeomSum</a></td></tr></table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>However, we are subject to <strong>Lambda</strong> scoping restrictions if we try to relabel in any manner such that they map to the same <strong>Variable</strong> (or the meaning could be changed in a manner that is not strictly weaker).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ScopingViolation</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">infGeomSum</span><span class="o">.</span><span class="n">relabel</span><span class="p">({</span><span class="n">m</span><span class="p">:</span><span class="n">x</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ScopingViolation error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ScopingViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Relabeling in violation of Variable scoping restrictions.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">infGeomSum</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">m</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ScopingViolation error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ScopingViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Relabeling in violation of Variable scoping restrictions.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">infGeomSum</span><span class="o">.</span><span class="n">relabeled</span><span class="p">({</span><span class="n">x</span><span class="p">:</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span><span class="n">n</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Expecting an ScopingViolation error; should not make it to this point&quot;</span>
+<span class="k">except</span> <span class="n">ScopingViolation</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR: Relabeling in violation of Variable scoping restrictions.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">end</span> relabeling
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Next-chapter:-Universal-Quantification-(Forall)">Next chapter: <a href="tutorial05_forall.ipynb">Universal Quantification (Forall)</a><a class="anchor-link" href="#Next-chapter:-Universal-Quantification-(Forall)">&#182;</a></h1><h2 id="Table-of-Contents"><a href="tutorial00_introduction.ipynb#contents">Table of Contents</a><a class="anchor-link" href="#Table-of-Contents">&#182;</a></h2>
+</div>
+</div>
+</div>
+    </div>
+  </div>
+<footer>
+  <p>These web pages were generated on 2019-07-14 by <a href="https://github.com/PyProveIt/Prove-It">Prove-It</a> Beta Version 0.3, licensed under the GNU Public License by Sandia Corporation.</p>
+  <p>Presented proofs are not absolutely guaranteed.  For assurance, it is important to check the structure 
+  of the statement being proven, independently verify the derivation steps, track dependencies, and ensure that 
+  employed axioms are valid and properly structured.  Inconsistencies may exist, unknowingly, in this system.
+  </p>
+  <p>
+  This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research, under the Quantum Computing Application Teams program. Sandia National Labs is managed and operated by National Technology and Engineering Solutions of Sandia, LLC, a subsidiary of Honeywell International, Inc., for the U.S. Dept. of Energy's NNSA under contract DE-NA0003525. The views expressed above do not necessarily represent the views of the DOE or the U.S. Government.
+  </p>
+  <br>
+  <p>Please send questions/comments to: <a href="mailto:wwitzel@sandia.gov">
+  wwitzel@sandia.gov</a>.</p>
+</footer> 
+</body>
+
+ 
+
+
+</html>

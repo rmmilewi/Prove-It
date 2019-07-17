@@ -1,0 +1,930 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>proveit._core_.expression.composite.expr_tensor &#8212; Prove-It 0.3 documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for proveit._core_.expression.composite.expr_tensor</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.composite</span> <span class="k">import</span> <span class="n">Composite</span>
+<span class="kn">from</span> <span class="nn">.expr_list</span> <span class="k">import</span> <span class="n">ExprList</span>
+<span class="kn">from</span> <span class="nn">proveit._core_.expression.expr</span> <span class="k">import</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">MakeNotImplemented</span>
+<span class="kn">from</span> <span class="nn">proveit._core_.defaults</span> <span class="k">import</span> <span class="n">defaults</span><span class="p">,</span> <span class="n">USE_DEFAULTS</span>
+<span class="kn">from</span> <span class="nn">.iteration</span> <span class="k">import</span> <span class="n">Iter</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+                
+
+<div class="viewcode-block" id="ExprTensor"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor">[docs]</a><span class="k">class</span> <span class="nc">ExprTensor</span><span class="p">(</span><span class="n">Composite</span><span class="p">,</span> <span class="n">Expression</span><span class="p">):</span> 
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    An ExprTensor is a composite Expression representing</span>
+<span class="sd">    an n-dimensional tensor.  It serves to map n-coordinate </span>
+<span class="sd">    &quot;locations&quot; to Expression elements.  The coordinates may </span>
+<span class="sd">    be general Expressions that are intended to represent </span>
+<span class="sd">    Integer numbers.</span>
+<span class="sd">    </span>
+<span class="sd">    The ExprTensor stores entries in terms of &quot;relative</span>
+<span class="sd">    element locations&quot;.  For each axis, all relevent coordinate </span>
+<span class="sd">    expressions are sorted into a sorting-relation expression </span>
+<span class="sd">    (for example, &quot;a &lt; b &lt;= c = d &lt; e&quot;, or some such form).  </span>
+<span class="sd">    The index of these  operands serve as coordinates for </span>
+<span class="sd">    the &quot;relative element locations&quot;.  We can translate from </span>
+<span class="sd">    one &quot;location&quot; representation to the other using the</span>
+<span class="sd">    coordinate sorting relations.</span>
+<span class="sd">    </span>
+<span class="sd">    There may be Embed Expression elements for embedding</span>
+<span class="sd">    a tensor within the tensor that may be substituted into</span>
+<span class="sd">    the outer tensor.  When this happens, new coordinates may</span>
+<span class="sd">    be added, generating new coordinate sorting relations.</span>
+<span class="sd">    A specialization step that results in such a substitution</span>
+<span class="sd">    will be conditioned upon the proof of any new coordinate</span>
+<span class="sd">    sorting relations (these are extra conditions in addition</span>
+<span class="sd">    to any explicit conditions of the universal quantifier(s)</span>
+<span class="sd">    being specialized).</span>
+<span class="sd">    </span>
+<span class="sd">    Axioms involving an ExprTensor should properly be stated</span>
+<span class="sd">    by way of an implication -- the statement involving</span>
+<span class="sd">    the ExprTensor is the consequent that is only valid</span>
+<span class="sd">    provided the coordinate sorting relations, in the</span>
+<span class="sd">    antecedent, is true.  Corresponding theorems can then be</span>
+<span class="sd">    proven by showing that the coordinate sorting relations</span>
+<span class="sd">    are true (under the conditions of any universal quantifiers</span>
+<span class="sd">    or other axioms).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">styles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">,</span> <span class="n">requirements</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create an ExprTensor either with a simple, dense tensor (list of lists ... of lists) or</span>
+<span class="sd">        with a dictionary mapping coordinates (as tuples of expressions that represent integers) </span>
+<span class="sd">        to expr elements or Blocks.</span>
+<span class="sd">        Providing starting and/or ending location(s) can extend the bounds of the tensor beyond</span>
+<span class="sd">        the elements that are supplied.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.composite</span> <span class="k">import</span> <span class="n">_simplifiedCoord</span>
+        <span class="kn">from</span> <span class="nn">proveit._core_</span> <span class="k">import</span> <span class="n">KnownTruth</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">Less</span><span class="p">,</span> <span class="n">Greater</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">one</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Subtract</span>
+        
+        <span class="n">assumptions</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">checkedAssumptions</span><span class="p">(</span><span class="n">assumptions</span><span class="p">)</span>
+        <span class="n">requirements</span> <span class="o">=</span> <span class="p">[]</span>                
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">tensor</span> <span class="o">=</span> <span class="p">{</span><span class="n">loc</span><span class="p">:</span><span class="n">element</span> <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ExprTensor</span><span class="o">.</span><span class="n">_tensorDictFromIterables</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">)}</span>
+                
+        <span class="c1"># Map direct compositions for the end-coordinate of Iter elements</span>
+        <span class="c1"># to their simplified forms.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endCoordSimplifications</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                
+        <span class="c1"># generate the set of distinct coordinates for each dimension</span>
+        <span class="n">coord_sets</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># simplified versions</span>
+        <span class="n">full_tensor</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">ndims</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">ExprTensor</span><span class="o">.</span><span class="n">locAsExprs</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">ndims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">tensor</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">KnownTruth</span><span class="p">):</span>
+                <span class="n">element</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">expr</span> <span class="c1"># extract the Expression from the KnownTruth</span>
+            <span class="n">ndims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">coord_sets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">coord_sets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">set</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndims</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">coord_sets</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ndims</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;length of &#39;shape&#39; is inconsistent with number of dimensions for ExprTensor locations&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;inconsistent number of dimensions for locations of the ExprTensor&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">loc</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="n">coord</span> <span class="o">=</span> <span class="n">num</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="c1"># convert from Python int to an Expression</span>
+                    <span class="n">loc</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">coord</span>
+                <span class="n">coord_sets</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">Iter</span><span class="p">):</span>
+                    <span class="c1"># Add (end-start)+1 of the Iter to get to the end</span>
+                    <span class="c1"># location of the entry along this axis. </span>
+                    <span class="n">orig_end_coord</span> <span class="o">=</span> <span class="n">Add</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">Subtract</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">end_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">],</span> <span class="n">element</span><span class="o">.</span><span class="n">start_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">]),</span> <span class="n">one</span><span class="p">)</span>
+                    <span class="n">end_coord</span> <span class="o">=</span> <span class="n">_simplifiedCoord</span><span class="p">(</span><span class="n">orig_end_coord</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">endCoordSimplifications</span><span class="p">[</span><span class="n">orig_end_coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_coord</span>
+                    <span class="n">coord_sets</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">end_coord</span><span class="p">)</span>
+            <span class="n">full_tensor</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">loc</span><span class="p">)]</span> <span class="o">=</span> <span class="n">element</span>
+
+        <span class="k">if</span> <span class="n">ndims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;Empty ExprTensor is not allowed&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndims</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;ExprTensor must be 2 or more dimensions (use an ExprList for something 1-dimensional&quot;</span><span class="p">)</span>
+
+        <span class="c1"># in each dimension, coord_indices will be a dictionary</span>
+        <span class="c1"># that maps each tensor location coordinate to its relative entry index.</span>
+        <span class="n">coord_rel_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sortedCoordLists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordDiffRelationLists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndims</span><span class="p">):</span> <span class="c1"># for each axis</span>
+            <span class="c1"># KnownTruth sorting relation for the simplified coordinates used along this axis</span>
+            <span class="c1"># (something with a form like a &lt; b &lt;= c = d &lt;= e, that sorts the tensor location coordinates): </span>
+            <span class="n">coord_sorting_relation</span> <span class="o">=</span> <span class="n">Less</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">coord_sets</span><span class="p">[</span><span class="n">axis</span><span class="p">],</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>
+            <span class="n">sorted_coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Since nothing was explicitly specified, the shape is dictacted by extending</span>
+                <span class="c1"># one beyond the last coordinate entry. </span>
+                <span class="n">sorted_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Add</span><span class="p">(</span><span class="n">sorted_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">one</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sorted_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">])</span> <span class="c1"># append the coordinate for the explicitly specified shape</span>
+            <span class="k">if</span> <span class="n">sorted_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">zero</span><span class="p">:</span>
+                <span class="n">sorted_coords</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">zero</span><span class="p">)</span> <span class="c1"># make sure the first of the sorted coordinates is zero.</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">sortedCoordLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ExprList</span><span class="p">(</span><span class="n">sorted_coords</span><span class="p">))</span>
+            
+            <span class="c1"># Add in coordinate expressions that explicitly indicate the difference between coordinates.</span>
+            <span class="c1"># These may be used in generating the latex form of the ExprTensor.</span>
+            <span class="n">diff_relations</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sorted_coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sorted_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="n">_simplifiedCoord</span><span class="p">(</span><span class="n">Subtract</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">),</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">)</span>
+                <span class="c1"># get the relationship between the difference of successive coordinate and zero.</span>
+                <span class="n">diff_relation</span> <span class="o">=</span> <span class="n">Greater</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">zero</span><span class="p">,</span> <span class="n">diff</span><span class="p">],</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">diff_relation</span><span class="p">,</span> <span class="n">Greater</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">c2</span> <span class="o">==</span> <span class="n">sorted_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;Coordinates extend beyond the specified shape in axis </span><span class="si">%d</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> after </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">])))</span>                        
+                    <span class="k">assert</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">diff_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">zero</span><span class="p">),</span> <span class="s1">&#39;Inconsistent Less.sort results&#39;</span>
+                    <span class="c1"># diff &gt; 0, let&#39;s compare it with one now</span>
+                    <span class="n">diff_relation</span> <span class="o">=</span> <span class="n">Greater</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">one</span><span class="p">,</span> <span class="n">diff</span><span class="p">],</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>
+                <span class="n">requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">diff_relation</span><span class="p">)</span>
+                <span class="n">diff_relations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">diff_relation</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coordDiffRelationLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ExprList</span><span class="p">(</span><span class="n">diff_relations</span><span class="p">))</span>
+                
+            <span class="c1"># map each coordinate expression to its index into the sorting_relation operands</span>
+            <span class="n">coord_rel_indices</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">coord</span><span class="p">:</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_coords</span><span class="p">)})</span>
+            
+        <span class="c1"># convert from the full tensor with arbitrary expression coordinates to coordinates that are</span>
+        <span class="c1"># mapped according to sorted relation enumerations.</span>
+        <span class="n">rel_index_tensor</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">full_tensor</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">rel_index_loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">rel_index_map</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="k">for</span> <span class="n">coord</span><span class="p">,</span> <span class="n">rel_index_map</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">coord_rel_indices</span><span class="p">))</span>
+            <span class="n">rel_index_tensor</span><span class="p">[</span><span class="n">rel_index_loc</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span>
+                
+        <span class="n">sorted_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rel_index_tensor</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ExprTensor&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ndims</span><span class="p">),</span> <span class="s1">&#39;;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sorted_keys</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortedCoordLists</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordDiffRelationLists</span> <span class="o">+</span> <span class="p">[</span><span class="n">rel_index_tensor</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sorted_keys</span><span class="p">],</span> <span class="n">styles</span><span class="o">=</span><span class="n">styles</span><span class="p">,</span> <span class="n">requirements</span><span class="o">=</span><span class="n">requirements</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span> <span class="o">=</span> <span class="n">ndims</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relIndexTensor</span> <span class="o">=</span> <span class="n">rel_index_tensor</span>
+        
+        <span class="c1"># entryOrigins maps relative indices that contain tensor elements to</span>
+        <span class="c1"># the relative indices of the origin for the corresponding entry.</span>
+        <span class="c1"># Specifically, single-element entries map indices to themselves, but</span>
+        <span class="c1"># multi-element Iter entries map each of the encompassed </span>
+        <span class="c1"># relative index location to the origin relative index location where</span>
+        <span class="c1"># that Iter entry is stored.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relEntryOrigins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_makeEntryOrigins</span><span class="p">()</span>
+        
+        <span class="c1"># the last coordinates of the sorted coordinates along each eaxis define the shape:        </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">ExprList</span><span class="p">([</span><span class="n">sorted_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">sorted_coords</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortedCoordLists</span><span class="p">])</span>
+    
+<div class="viewcode-block" id="ExprTensor.locAsExprs"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.locAsExprs">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">locAsExprs</span><span class="p">(</span><span class="n">loc</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">num</span>
+        <span class="n">loc_exprs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">loc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">coord</span> <span class="o">=</span> <span class="n">num</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="c1"># convert int to an Expression</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">Expression</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;location coordinates must be Expression objects (or &#39;int&#39;s to convert to Expressions)&quot;</span><span class="p">)</span>
+            <span class="n">loc_exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loc_exprs</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_tensorDictFromIterables</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        From nested lists of Expressions, create a tensor dictionary, </span>
+<span class="sd">        mapping multi-dimensional indices to Expression elements.</span>
+<span class="sd">        Yields location, element pairs that define a tensor.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">proveit._core_</span> <span class="k">import</span> <span class="n">KnownTruth</span>        
+        <span class="kn">from</span> <span class="nn">.composite</span> <span class="k">import</span> <span class="n">_simplifiedCoord</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">zero</span><span class="p">,</span> <span class="n">one</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Subtract</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="n">zero</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">tensor</span><span class="p">:</span>
+                <span class="c1"># simplify the coordinate before moving on</span>
+                <span class="c1"># (the simplified form will be equated with the original in the</span>
+                <span class="c1"># sorting relations of the ExprTensor).</span>
+                <span class="n">coord</span> <span class="o">=</span> <span class="n">_simplifiedCoord</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">KnownTruth</span><span class="p">):</span>
+                    <span class="n">entry</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">expr</span> <span class="c1"># extract the Expression from the KnownTruth</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">Expression</span><span class="p">):</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord</span><span class="p">,)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">Iter</span><span class="p">)</span> <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">loc</span> <span class="o">+=</span> <span class="p">(</span><span class="n">zero</span><span class="p">,)</span><span class="o">*</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">ndims</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># append zeros for the extra dimensions</span>
+                    <span class="k">yield</span> <span class="n">loc</span><span class="p">,</span> <span class="n">entry</span> <span class="c1"># yield the location and element</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">Iter</span><span class="p">):</span>
+                        <span class="c1"># skip the coordinate ahead over the Embed expression</span>
+                        <span class="n">coord</span> <span class="o">=</span> <span class="n">Add</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">Subtract</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">end_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry</span><span class="o">.</span><span class="n">start_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">one</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">coord</span> <span class="o">=</span> <span class="n">Add</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">one</span><span class="p">)</span> <span class="c1"># shift the coordinate ahead by one</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">sub_loc</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">ExprTensor</span><span class="o">.</span><span class="n">TensorDictFromIterables</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
+                        <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord</span><span class="p">,)</span><span class="o">+</span><span class="n">sub_loc</span>
+                        <span class="k">yield</span> <span class="n">loc</span><span class="p">,</span> <span class="n">entry</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;An ExprTensor must be a dictionary of indices to elements or a nested iterables of Expressions&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_makeEntryOrigins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        entryOrigins maps relative indices that contain tensor elements to</span>
+<span class="sd">        the relative indices of the origin for the corresponding entry.</span>
+<span class="sd">        Specifically, single-element entries map indices to themselves, but</span>
+<span class="sd">        multi-element Iter entries map each of the encompassed </span>
+<span class="sd">        relative index location to the origin relative index location where</span>
+<span class="sd">        that Iter entry is stored.</span>
+<span class="sd">        </span>
+<span class="sd">        Raise an ExprTensorError if there are overlapping entries.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.iteration</span> <span class="k">import</span> <span class="n">Iter</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Subtract</span><span class="p">,</span> <span class="n">one</span>
+        
+        <span class="c1"># Create the entry_origins dictionary and check for invalid</span>
+        <span class="c1"># overlapping entries while we are at it.</span>
+        <span class="n">rel_entry_origins</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">rel_index_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relIndexTensor</span>
+        <span class="k">for</span> <span class="n">rel_entry_loc</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">rel_index_tensor</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">Iter</span><span class="p">):</span>
+                <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensorLoc</span><span class="p">(</span><span class="n">rel_entry_loc</span><span class="p">)</span>
+                
+                <span class="c1"># corner location at the end of the Embed block:</span>
+                <span class="n">end_corner</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">loc</span><span class="p">):</span>
+                    <span class="n">end_coord</span> <span class="o">=</span> <span class="n">Add</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">Subtract</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">end_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">],</span> <span class="n">entry</span><span class="o">.</span><span class="n">start_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">]),</span> <span class="n">one</span><span class="p">)</span>
+                    <span class="n">end_corner</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endCoordSimplifications</span><span class="p">[</span><span class="n">end_coord</span><span class="p">])</span>
+                
+                <span class="c1"># translate the end corner location to the corresponding relative indices</span>
+                <span class="n">rel_entry_end_corner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relEntryLoc</span><span class="p">(</span><span class="n">end_corner</span><span class="p">)</span>
+                
+                <span class="c1"># iterate over all of the relative indexed locations from the starting corner to </span>
+                <span class="c1"># the ending corner of the Iter block, populating the entry_origins dictionary and </span>
+                <span class="c1"># making sure none of the locations overlap with something else.</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rel_entry_loc</span><span class="p">,</span> <span class="n">rel_entry_end_corner</span><span class="p">)]):</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">rel_entry_origins</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;Overlapping blocks in the ExprTensor&quot;</span><span class="p">)</span>
+                    <span class="n">rel_entry_origins</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">rel_entry_loc</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># single-element entry.  check for overlap and add to the entry_origins dictionary</span>
+                <span class="k">if</span> <span class="n">rel_entry_loc</span> <span class="ow">in</span> <span class="n">rel_entry_origins</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;Overlapping blocks in the ExprTensor&quot;</span><span class="p">)</span>
+                <span class="n">rel_entry_origins</span><span class="p">[</span><span class="n">rel_entry_loc</span><span class="p">]</span> <span class="o">=</span> <span class="n">rel_entry_loc</span>
+                
+        <span class="c1"># Return the entry_origins dictionary that we generated.</span>
+        <span class="k">return</span> <span class="n">rel_entry_origins</span> 
+    
+<div class="viewcode-block" id="ExprTensor.relEntryLoc"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.relEntryLoc">[docs]</a>    <span class="k">def</span> <span class="nf">relEntryLoc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the relative entry location given the absolute tensor location.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">ExprTensor</span><span class="o">.</span><span class="n">relEntryLocation</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordSortingRelations</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExprTensor.tensorLoc"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.tensorLoc">[docs]</a>    <span class="k">def</span> <span class="nf">tensorLoc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel_entry_loc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the absolute tensor location given the relative entry location.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">ExprTensor</span><span class="o">.</span><span class="n">tensorLocation</span><span class="p">(</span><span class="n">rel_entry_loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordSortingRelations</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ExprTensor.relEntryLocation"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.relEntryLocation">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">relEntryLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the relative entry location given the absolute tensor location using </span>
+<span class="sd">        the given relations for sorting the absolute tensor coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rel_entry_loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span><span class="p">,</span> <span class="n">sorting_relation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">rel_entry_loc</span></div>
+            
+<div class="viewcode-block" id="ExprTensor.tensorLocation"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.tensorLocation">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">tensorLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel_entry_loc</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the absolute tensor location given the relative entry location using </span>
+<span class="sd">        the given relations for sorting the absolute tensor coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">sorting_relation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rel_entry_loc</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">loc</span></div>
+                        
+<div class="viewcode-block" id="ExprTensor.numEntries"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.numEntries">[docs]</a>    <span class="k">def</span> <span class="nf">numEntries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the number of tensor entries.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relIndexTensor</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ExprTensor.items"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Yield each relative entry location and corresponding element.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relIndexTensor</span><span class="o">.</span><span class="n">items</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ExprTensor.values"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Yield each tensor element.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relIndexTensor</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+    
+<div class="viewcode-block" id="ExprTensor.keys"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the relative entry location keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relIndexTensor</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+    
+<div class="viewcode-block" id="ExprTensor.relEndCorner"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.relEndCorner">[docs]</a>    <span class="k">def</span> <span class="nf">relEndCorner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel_entry_loc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Given a relative location of one of the tensor entries,</span>
+<span class="sd">        return the relative location for the &quot;end-corner&quot; of</span>
+<span class="sd">        the entry.  If the entry is an Iter, then this</span>
+<span class="sd">        relative end corner gives the relative range of the</span>
+<span class="sd">        iteration inclusively.  Otherwise, the end-corner is</span>
+<span class="sd">        simply rel_loc; that is, the start and the end are</span>
+<span class="sd">        the same for single-element entries.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Translate from relative to absolute location, use</span>
+        <span class="c1"># the endCorner method, then translate this result from</span>
+        <span class="c1"># absolute to relative.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">relEntryLoc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endCorner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensorLoc</span><span class="p">(</span><span class="n">rel_entry_loc</span><span class="p">)))</span></div>
+    
+<div class="viewcode-block" id="ExprTensor.endCorner"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.endCorner">[docs]</a>    <span class="k">def</span> <span class="nf">endCorner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_entry_loc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Given an absolute tensor entry location,</span>
+<span class="sd">        return the absolute location for the &quot;end-corner&quot; of</span>
+<span class="sd">        the entry.  If the entry is an Iter, then this</span>
+<span class="sd">        absolute end corner gives the range of the</span>
+<span class="sd">        iteration inclusively.  Otherwise, the end-corner is</span>
+<span class="sd">        simply tensor_entry_loc; that is, the start and the </span>
+<span class="sd">        end are the same for single-element entries.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">one</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Subtract</span>
+        <span class="kn">from</span> <span class="nn">.iteration</span> <span class="k">import</span> <span class="n">Iter</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">relEntryLoc</span><span class="p">(</span><span class="n">tensor_entry_loc</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">Iter</span><span class="p">):</span>
+            <span class="n">end_corner</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tensor_entry_loc</span><span class="p">):</span>
+                <span class="c1"># Add (end-start)+1 of the Iter to get to the end</span>
+                <span class="c1"># location of the entry along this axis. </span>
+                <span class="n">orig_end_coord</span> <span class="o">=</span> <span class="n">Add</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">Subtract</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">end_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">],</span> <span class="n">entry</span><span class="o">.</span><span class="n">start_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">]),</span> <span class="n">one</span><span class="p">)</span>
+                <span class="n">end_corner</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endCoordSimplifications</span><span class="p">[</span><span class="n">orig_end_coord</span><span class="p">])</span> <span class="c1"># use the simplified version</span>
+            <span class="k">return</span> <span class="n">end_corner</span> <span class="c1"># absolute end-corner for the tensor entry</span>
+        <span class="k">return</span> <span class="n">tensor_entry_loc</span> <span class="c1"># single-element entry</span></div>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel_entry_loc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the tensor entry at the given relative</span>
+<span class="sd">        entry location key.  See getElem(..) for</span>
+<span class="sd">        getting the element at an absolute location.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">relIndexTensor</span><span class="p">[</span><span class="n">rel_entry_loc</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="ExprTensor.getElem"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.getElem">[docs]</a>    <span class="k">def</span> <span class="nf">getElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">,</span> <span class="n">requirements</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the tensor element at the indices location, given</span>
+<span class="sd">        as an Expression, using the given assumptions as needed</span>
+<span class="sd">        to interpret the location expression.  Required</span>
+<span class="sd">        truths, proven under the given assumptions, that </span>
+<span class="sd">        were used to make this interpretation will be</span>
+<span class="sd">        appended to the given &#39;requirements&#39; (if provided).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">num</span><span class="p">,</span> <span class="n">Less</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Subtract</span>
+        <span class="kn">from</span> <span class="nn">.iteration</span> <span class="k">import</span> <span class="n">Iter</span>
+        <span class="kn">from</span> <span class="nn">.composite</span> <span class="k">import</span> <span class="n">_simplifiedCoord</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;The &#39;indices&#39; has the wrong number of dimensions: </span><span class="si">%d</span><span class="s2"> instead of </span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">requirements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">requirements</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># requirements won&#39;t be passed back in this case</span>
+
+        <span class="k">if</span> <span class="n">base</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> 
+            <span class="c1"># subtract off the base if it is not zero</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">Subtract</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">))</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+        <span class="n">tensor_loc</span> <span class="o">=</span> <span class="p">[</span><span class="n">_simplifiedCoord</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+
+        <span class="n">lower_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">upper_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">coord</span><span class="p">,</span> <span class="n">sorted_coords</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tensor_loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortedCoordLists</span><span class="p">):</span>
+            <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">Less</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">sorted_coords</span><span class="p">,</span> <span class="n">coord</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;Could not determine the &#39;indices&#39; range within the tensor coordinates under the given assumptions&quot;</span><span class="p">)</span>
+            <span class="c1"># The relationship to the lower and upper coordinate bounds are requirements for determining</span>
+            <span class="c1"># the element being assessed.</span>
+            <span class="n">requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Less</span><span class="o">.</span><span class="n">sort</span><span class="p">((</span><span class="n">sorted_coords</span><span class="p">[</span><span class="n">lower</span><span class="p">],</span> <span class="n">coord</span><span class="p">),</span> <span class="n">reorder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">))</span>
+            <span class="n">requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Less</span><span class="o">.</span><span class="n">sort</span><span class="p">((</span><span class="n">coord</span><span class="p">,</span> <span class="n">sorted_coords</span><span class="p">[</span><span class="n">upper</span><span class="p">]),</span> <span class="n">reorder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">))</span>
+            <span class="n">lower_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lower</span><span class="p">)</span>
+            <span class="n">upper_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">upper</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">lower_indices</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entryOrigins</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">upper_indices</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entryOrigins</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;Tensor element could not be found at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="n">tensor_loc</span><span class="p">))</span>
+        <span class="n">rel_entry_origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relEntryOrigins</span><span class="p">[</span><span class="n">lower_indices</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relEntryOrigins</span><span class="p">[</span><span class="n">upper_indices</span><span class="p">]</span> <span class="o">!=</span> <span class="n">rel_entry_origin</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExprTensorError</span><span class="p">(</span><span class="s2">&quot;Tensor element is ambiguous for </span><span class="si">%s</span><span class="s2"> under the given assumptions&quot;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="n">tensor_loc</span><span class="p">))</span>
+        
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">rel_entry_origin</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">Iter</span><span class="p">):</span>
+            <span class="c1"># indexing into an iteration</span>
+            <span class="n">entry_origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensorLoc</span><span class="p">(</span><span class="n">rel_entry_origin</span><span class="p">)</span>
+            <span class="n">iter_start_indices</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">start_indices</span>
+            <span class="n">iter_loc</span> <span class="o">=</span> <span class="p">[</span><span class="n">Add</span><span class="p">(</span><span class="n">iter_start</span><span class="p">,</span> <span class="n">Subtract</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">origin</span><span class="p">))</span> <span class="k">for</span> <span class="n">iter_start</span><span class="p">,</span> <span class="n">coord</span><span class="p">,</span> <span class="n">origin</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">iter_start_indices</span><span class="p">,</span> <span class="n">tensor_loc</span><span class="p">,</span> <span class="n">entry_origin</span><span class="p">)]</span> 
+            <span class="n">simplified_iter_loc</span> <span class="o">=</span> <span class="p">[</span><span class="n">_simplifiedCoord</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">iter_loc</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">entry</span><span class="o">.</span><span class="n">getInstance</span><span class="p">(</span><span class="n">simplified_iter_loc</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="o">=</span><span class="n">requirements</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># just a single-element entry</span>
+            <span class="k">assert</span> <span class="n">lower_indices</span><span class="o">==</span><span class="n">upper_indices</span><span class="p">,</span> <span class="s2">&quot;A single-element entry should not have been determined if there was an ambiguous range for &#39;tensor_loc&#39;&quot;</span>
+            <span class="k">return</span> <span class="n">entry</span></div>
+        
+<div class="viewcode-block" id="ExprTensor.yieldLocationDeltas"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.yieldLocationDeltas">[docs]</a>    <span class="k">def</span> <span class="nf">yieldLocationDeltas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        For the given axis, yield the difference between each</span>
+<span class="sd">        successive coordinate at which an element is explicitly</span>
+<span class="sd">        located for this tensor (or where an Embed block ends).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">zero</span><span class="p">,</span> <span class="n">Add</span>
+        <span class="kn">from</span> <span class="nn">proveit.logic</span> <span class="k">import</span> <span class="n">Equals</span>
+        <span class="n">prev_coord</span> <span class="o">=</span> <span class="n">zero</span>
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorting_relations</span><span class="p">[</span><span class="n">axis</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">Equals</span><span class="p">(</span><span class="n">prev_coord</span><span class="p">,</span> <span class="n">coord</span><span class="p">)</span><span class="o">.</span><span class="n">prove</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sorting_relations</span><span class="p">[</span><span class="n">axis</span><span class="p">]],</span> <span class="n">automation</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">Add</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">coord</span><span class="o">.</span><span class="n">operands</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">coord</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">prev_coord</span><span class="p">,</span> <span class="s2">&quot;The first of a set of equal coordinates in the sorting relations are supposed to indicate the difference from the previous one.&quot;</span>
+                <span class="k">yield</span> <span class="n">coord</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># this term is the difference between this coordinate and the simplified form of the previous one</span>
+            <span class="n">prev_coord</span> <span class="o">=</span> <span class="n">coord</span></div>
+    
+
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    def yieldRequirements(self):</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        Yield KnownTruth&#39;s that are prerequisites for this</span>
+<span class="sd">        Expression.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        for sub_req in Expression.yieldRequirements(self):</span>
+<span class="sd">            yield sub_req</span>
+<span class="sd">        for sorting_relations in self.sorting_relations:</span>
+<span class="sd">            yield sorting_relations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+            
+<div class="viewcode-block" id="ExprTensor.remakeArguments"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.remakeArguments">[docs]</a>    <span class="k">def</span> <span class="nf">remakeArguments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Yield the argument (key, value) pairs that could be used to </span>
+<span class="sd">        recreate the ExprTensor.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="p">{</span><span class="n">loc</span><span class="p">:</span><span class="n">element</span> <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">yield</span> <span class="n">tensor</span></div>
+                                    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_make</span><span class="p">(</span><span class="n">subClass</span><span class="p">,</span> <span class="n">coreInfo</span><span class="p">,</span> <span class="n">styles</span><span class="p">,</span> <span class="n">subExpressions</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">subClass</span> <span class="o">!=</span> <span class="n">ExprTensor</span><span class="p">:</span> 
+            <span class="n">MakeNotImplemented</span><span class="p">(</span><span class="n">subClass</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coreInfo</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expecting ExprTensor coreInfo to contain exactly 3 items: &#39;ExprTensor&#39;, the number of dimensions, and the indexed locations&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">coreInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;ExprTensor&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expecting ExprTensor coreInfo[0] to be &#39;ExprTensor&#39;&quot;</span><span class="p">)</span>
+        <span class="n">ndims</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">coreInfo</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">indexed_loc_strs</span> <span class="o">=</span> <span class="n">coreInfo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+        <span class="c1"># coordinate-sorting relations in each dimension</span>
+        <span class="n">sorting_relations</span> <span class="o">=</span> <span class="n">subExpressions</span><span class="p">[:</span><span class="n">ndims</span><span class="p">]</span>
+        <span class="n">indexed_tensor</span> <span class="o">=</span> <span class="p">{</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">indexed_loc_str</span><span class="p">):</span><span class="n">element</span> <span class="k">for</span> <span class="n">indexed_loc_str</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indexed_loc_strs</span><span class="p">,</span> <span class="n">subExpressions</span><span class="p">[</span><span class="n">ndims</span><span class="o">+</span><span class="mi">1</span><span class="p">:])}</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="p">{</span><span class="n">ExprTensor</span><span class="o">.</span><span class="n">tensorLocation</span><span class="p">(</span><span class="n">indexed_loc</span><span class="p">,</span> <span class="n">sorting_relations</span><span class="p">):</span><span class="n">element</span> <span class="k">for</span> <span class="n">indexed_loc</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">indexed_tensor</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">ExprTensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span><span class="o">.</span><span class="n">withStyles</span><span class="p">(</span><span class="o">**</span><span class="n">styles</span><span class="p">)</span>
+                                                                              
+<div class="viewcode-block" id="ExprTensor.string"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.string">[docs]</a>    <span class="k">def</span> <span class="nf">string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fence</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="n">fence</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">element</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="n">fence</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span></div>
+    
+    <span class="k">def</span> <span class="nf">_config_latex_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lt</span><span class="p">):</span>
+        <span class="n">Expression</span><span class="o">.</span><span class="n">_config_latex_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;xy&#39;</span> <span class="ow">in</span> <span class="n">lt</span><span class="o">.</span><span class="n">packages</span><span class="p">:</span>
+            <span class="n">lt</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;xy&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="sa">r</span><span class="s1">&#39;\newcommand{\exprtensorelem}&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lt</span><span class="o">.</span><span class="n">preamble</span><span class="p">:</span>
+            <span class="n">lt</span><span class="o">.</span><span class="n">preamble</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;\newcommand{\exprtensorelem}[1]{*+&lt;1em,.9em&gt;{\hphantom{#1}} \POS [0,0]=&quot;i&quot;,[0,0].[0,0]=&quot;e&quot;,!C *{#1},&quot;e&quot;+UR;&quot;e&quot;+UL **\dir{-};&quot;e&quot;+DL **\dir{-};&quot;e&quot;+DR **\dir{-};&quot;e&quot;+UR **\dir{-}, &quot;i&quot;}&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="sa">r</span><span class="s1">&#39;\newcommand{\exprtensorblock}&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lt</span><span class="o">.</span><span class="n">preamble</span><span class="p">:</span>
+            <span class="n">lt</span><span class="o">.</span><span class="n">preamble</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;\newcommand{\exprtensorblock}[3]{\POS [0,0]=&quot;i&quot;,[0,0].[#1,#2]=&quot;e&quot;,!C *{#3},&quot;e&quot;+UR;&quot;e&quot;+UL **\dir{-};&quot;e&quot;+DL **\dir{-};&quot;e&quot;+DR **\dir{-};&quot;e&quot;+UR **\dir{-}, &quot;i&quot;}&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="sa">r</span><span class="s1">&#39;\newcommand{\exprtensorghost}&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lt</span><span class="o">.</span><span class="n">preamble</span><span class="p">:</span>
+            <span class="n">lt</span><span class="o">.</span><span class="n">preamble</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;\newcommand{\exprtensorghost}[1]{*+&lt;1em,.9em&gt;{\hphantom{#1}}}&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>        
+    
+<div class="viewcode-block" id="ExprTensor.latex"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.latex">[docs]</a>    <span class="k">def</span> <span class="nf">latex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fence</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">proveit._core_.expression.bundle</span> <span class="k">import</span> <span class="n">Block</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Only 2-dimensional ExprTensor formatting has been implemented.&#39;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ncolumns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">outStr</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\xymatrix @*=&lt;0em&gt; @C=1em @R=.7em{&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">current_row</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">current_col</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="c1"># first add arrows at the top for all column alignment indices</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncolumns</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="se">\a</span><span class="s1">r @{-&gt;} [0,1]&#39;</span>
+            <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; &amp; &#39;</span>
+        <span class="n">outStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span>
+        <span class="n">isAlignmentRow</span> <span class="o">=</span> <span class="mi">0</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># next add the populated elements</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)]</span>
+            <span class="n">blockAlignmentStr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">isAlignmentRow</span> <span class="ow">and</span> <span class="n">current_col</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="se">\a</span><span class="s1">r @{&lt;-} [0,1]&#39;</span>                
+            <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="n">current_row</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">isAlignmentRow</span><span class="p">:</span>
+                    <span class="c1"># add an arrow for the alignment index on the right side</span>
+                    <span class="k">while</span> <span class="n">ncolumns</span> <span class="o">&gt;</span> <span class="n">current_col</span><span class="p">:</span> 
+                        <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; &amp; &#39;</span>
+                        <span class="n">current_col</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="se">\a</span><span class="s1">r @{&lt;-} [0,-1]&#39;</span>
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39; </span><span class="se">\\</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">current_row</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">isAlignmentRow</span> <span class="o">=</span> <span class="n">current_row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">current_col</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="n">current_col</span><span class="p">:</span>
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; &amp; &#39;</span>
+                <span class="n">current_col</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">Block</span><span class="p">):</span>
+                <span class="n">block</span> <span class="o">=</span> <span class="n">element</span>
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;\exprtensorblock{&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}{&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">_ExpresisonTensorBlockGhost</span><span class="p">):</span>
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;\exprtensorghost&#39;</span>
+                <span class="n">block</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">ghosted_block</span>
+                <span class="n">block_r</span><span class="p">,</span> <span class="n">block_c</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">block_coord</span>
+                <span class="c1"># Add arrow(s) to indicate alignment coordinates &quot;into&quot; a block</span>
+                <span class="k">if</span> <span class="n">block_r</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">block_c</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">blockAlignmentStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39; \ar @{&lt;-} [0,-1]&#39;</span>
+                <span class="k">elif</span> <span class="n">block_r</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">block_c</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">blockAlignmentStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39; \ar @{&lt;-} [0,1]&#39;</span>
+                <span class="k">if</span> <span class="n">block_c</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">block_r</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">blockAlignmentStr</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39; \ar @{&lt;-} [-1,0]&#39;</span>
+                <span class="k">elif</span> <span class="n">block_c</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">block_c</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">blockAlignmentStr</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39; \ar @{&lt;-} [1,0]&#39;</span>
+            <span class="k">else</span><span class="p">:</span>                
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;\exprtensorelem&#39;</span>
+            <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">element</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">fence</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span> <span class="o">+</span> <span class="n">blockAlignmentStr</span>
+        <span class="c1"># finally add arrows at the bottom for all column alignment indices</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncolumns</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alignmentCoordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="se">\a</span><span class="s1">r @{-&gt;} [0,-1]&#39;</span>
+            <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39; &amp; &#39;</span>
+        <span class="n">outStr</span> <span class="o">+=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span>
+
+        <span class="n">outStr</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">outStr</span></div>
+    
+<div class="viewcode-block" id="ExprTensor.entryRanges"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.entryRanges">[docs]</a>    <span class="k">def</span> <span class="nf">entryRanges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">start_indices</span><span class="p">,</span> <span class="n">end_indices</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        For each entry of the tensor that is fully or partially contained in the window defined</span>
+<span class="sd">        via start_indices and end_indices (as Expressions that can be provably sorted</span>
+<span class="sd">        against tensor coordinates), yield the start and end of the intersection of the</span>
+<span class="sd">        entry range and the window.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">Less</span><span class="p">,</span> <span class="n">Greater</span>
+        <span class="k">if</span> <span class="n">requirements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">requirements</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># requirements won&#39;t be passed back in this case</span>
+                                
+        <span class="c1"># For each axis, obtain the sorted coordinates of the substituted tensor,</span>
+        <span class="c1"># insert the start and end indices for the desired range, and determine</span>
+        <span class="c1"># the starting and ending locations relative to operator positions of the </span>
+        <span class="c1"># expanded sorting relations.</span>
+        <span class="n">coord_sorting_relations</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># expanded sorting relations (including start and end indices) along each axis</span>
+        <span class="n">rel_start_loc</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># start location relative to the new sorting locations along each axis</span>
+        <span class="n">rel_end_loc</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># end location relative to the new sorting locations along each axis</span>
+        <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">):</span> <span class="c1"># for each axis</span>
+            <span class="n">start_index</span> <span class="o">=</span><span class="n">start_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+            <span class="n">end_index</span> <span class="o">=</span> <span class="n">end_indices</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+            
+            <span class="n">sorted_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortedCoordLists</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+            <span class="c1"># insert the start_index and the end_index into the sorted list of coordinates in their proper places</span>
+            <span class="n">coord_sorting_relation</span> <span class="o">=</span> <span class="n">Less</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">sorted_coords</span> <span class="o">+</span> <span class="p">[</span><span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">],</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>
+            <span class="c1"># get the relative start and end integer coordinates</span>
+            <span class="n">rel_start_loc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">start_index</span><span class="p">))</span>
+            <span class="n">rel_end_loc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">end_index</span><span class="p">))</span>
+            <span class="c1"># remember these sorting relations</span>
+            <span class="n">coord_sorting_relations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord_sorting_relation</span><span class="p">)</span>
+        
+        <span class="c1"># For each entry of the substituted tensor, determine if it is within the start/end</span>
+        <span class="c1"># &quot;window&quot;.  If so, yield the intersected range in terms of parameter values</span>
+        <span class="c1"># (inverted from the tensor coordinates).  Keep track of the requirements.</span>
+        <span class="k">for</span> <span class="n">rel_loc_in_tensor</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># convert from the relative location within the tensor to the</span>
+            <span class="c1"># tensor location in absolute coordinates.</span>
+            <span class="n">entry_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensorLoc</span><span class="p">(</span><span class="n">rel_loc_in_tensor</span><span class="p">)</span>
+            <span class="n">entry_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">endCorner</span><span class="p">(</span><span class="n">rel_loc_in_tensor</span><span class="p">)</span>
+            
+            <span class="c1"># convert from the absolute tensor location to the relative</span>
+            <span class="c1"># location w.r.t. the  coord_sorting_relations that include</span>
+            <span class="c1"># the startArgs and endArgs of the window.</span>
+            <span class="n">rel_entry_start</span> <span class="o">=</span> <span class="p">[</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span><span class="p">,</span> <span class="n">coord_sorting_relation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">entry_start</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">)]</span>
+            <span class="n">rel_entry_end</span> <span class="o">=</span> <span class="p">[</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span><span class="p">,</span> <span class="n">coord_sorting_relation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">entry_end</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">)]</span>
+            
+            <span class="c1"># get the intersection of the entry range and the considered window,</span>
+            <span class="n">rel_intersection_start</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rel_start_loc</span><span class="p">,</span> <span class="n">rel_entry_start</span><span class="p">)]</span>
+            <span class="n">rel_intersection_end</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rel_end_loc</span><span class="p">,</span> <span class="n">rel_entry_end</span><span class="p">)]</span>
+            
+            <span class="c1"># translate the intersection region to absolute coordinates</span>
+            <span class="n">intersection_start</span> <span class="o">=</span> <span class="p">[</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">coord_sorting_relation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rel_intersection_start</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">)]</span>
+            <span class="n">intersection_end</span> <span class="o">=</span> <span class="p">[</span><span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">coord_sorting_relation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rel_intersection_end</span><span class="p">,</span> <span class="n">coord_sorting_relations</span><span class="p">)]</span>
+                                
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rel_intersection_start</span><span class="p">,</span> <span class="n">rel_intersection_end</span><span class="p">)):</span>
+                <span class="c1"># empty intersection, but we need to include requirements that prove this.</span>
+                <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rel_intersection_start</span><span class="p">,</span> <span class="n">rel_intersection_end</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">:</span>
+                        <span class="c1"># add the requirements showing the intersection is empty along the first such axis.</span>
+                        <span class="n">coord_sorting_relation</span> <span class="o">=</span>  <span class="n">coord_sorting_relations</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+                        <span class="n">aCoord</span><span class="p">,</span> <span class="n">bCoord</span> <span class="o">=</span> <span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="n">b</span><span class="p">]</span>
+                        <span class="n">empty_intersection_relation</span> <span class="o">=</span> <span class="n">Greater</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">aCoord</span><span class="p">,</span> <span class="n">bCoord</span><span class="p">],</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>
+                        <span class="n">requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_intersection_relation</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># There is a non-empty intersection rectangle to yield for a particular entry.</span>
+                
+                <span class="c1"># Let&#39;s get the requirements that prove the intersection:</span>
+                <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rel_intersection_start</span><span class="p">,</span> <span class="n">rel_intersection_end</span><span class="p">,</span> <span class="n">rel_start_loc</span><span class="p">,</span> <span class="n">rel_entry_start</span><span class="p">,</span> <span class="n">rel_end_loc</span><span class="p">,</span> <span class="n">rel_entry_end</span><span class="p">)):</span>
+                    <span class="c1"># add the requirements that determine the intersection along this axis.</span>
+                    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">)):</span>
+                        <span class="n">coord_sorting_relation</span> <span class="o">=</span>  <span class="n">coord_sorting_relations</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+                        <span class="n">jCoord</span><span class="p">,</span> <span class="n">kCoord</span> <span class="o">=</span> <span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">coord_sorting_relation</span><span class="o">.</span><span class="n">operands</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                        <span class="n">empty_intersection_relation</span> <span class="o">=</span> <span class="n">Less</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">jCoord</span><span class="p">,</span> <span class="n">kCoord</span><span class="p">],</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">)</span>
+                        <span class="n">requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_intersection_relation</span><span class="p">)</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">intersection_start</span><span class="p">,</span> <span class="n">intersection_end</span><span class="p">)</span>        </div>
+        
+    
+<div class="viewcode-block" id="ExprTensor.substituted"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.substituted">[docs]</a>    <span class="k">def</span> <span class="nf">substituted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exprMap</span><span class="p">,</span> <span class="n">relabelMap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reservedVars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">USE_DEFAULTS</span><span class="p">,</span> <span class="n">requirements</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns this expression with the substitutions made </span>
+<span class="sd">        according to exprMap and/or relabeled according to relabelMap.</span>
+<span class="sd">        Flattens nested tensors (or lists of lists) that arise from Embed substitutions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.composite</span> <span class="k">import</span> <span class="n">_simplifiedCoord</span>
+        <span class="kn">from</span> <span class="nn">.iteration</span> <span class="k">import</span> <span class="n">Iter</span>
+        <span class="kn">from</span> <span class="nn">proveit.number</span> <span class="k">import</span> <span class="n">Add</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checkRelabelMap</span><span class="p">(</span><span class="n">relabelMap</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exprMap</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span> <span class="ow">in</span> <span class="n">exprMap</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">exprMap</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span><span class="o">.</span><span class="n">_restrictionChecked</span><span class="p">(</span><span class="n">reservedVars</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">requirements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">requirements</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># requirements won&#39;t be passed back in this case</span>
+
+        <span class="n">tensor</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">subbed_loc</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">substituted</span><span class="p">(</span><span class="n">exprMap</span><span class="p">,</span> <span class="n">relabelMap</span><span class="p">,</span> <span class="n">reservedVars</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="o">=</span><span class="n">requirements</span><span class="p">)</span>
+            <span class="n">subbed_elem</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">substituted</span><span class="p">(</span><span class="n">exprMap</span><span class="p">,</span> <span class="n">relabelMap</span><span class="p">,</span> <span class="n">reservedVars</span><span class="p">,</span> <span class="n">assumptions</span><span class="o">=</span><span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="o">=</span><span class="n">requirements</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">Iter</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subbed_elem</span><span class="p">,</span> <span class="n">ExprTensor</span><span class="p">):</span>
+                <span class="c1"># An iteration element became an ExprTensor upon substitution,</span>
+                <span class="c1"># so insert the elements directly into this outer ExprTensor.</span>
+                <span class="k">for</span> <span class="n">sub_loc</span><span class="p">,</span> <span class="n">sub_elem</span> <span class="ow">in</span> <span class="n">subbed_elem</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">net_loc</span> <span class="o">=</span> <span class="p">[</span><span class="n">_simplifiedCoord</span><span class="p">(</span><span class="n">Add</span><span class="p">(</span><span class="n">main_coord</span><span class="p">,</span> <span class="n">sub_coord</span><span class="p">),</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">requirements</span><span class="p">)</span> <span class="k">for</span> <span class="n">main_coord</span><span class="p">,</span> <span class="n">sub_coord</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subbed_loc</span><span class="p">,</span> <span class="n">sub_loc</span><span class="p">)]</span>
+                    <span class="n">tensor</span><span class="p">[</span><span class="n">net_loc</span><span class="p">]</span> <span class="o">=</span> <span class="n">subbed_elem</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tensor</span><span class="p">[</span><span class="n">subbed_loc</span><span class="p">]</span> <span class="o">=</span> <span class="n">subbed_elem</span>
+        <span class="n">expr_tensor</span> <span class="o">=</span> <span class="n">ExprTensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">)</span>
+        <span class="n">expr_tensor_requirements</span> <span class="o">=</span> <span class="n">expr_tensor</span><span class="o">.</span><span class="n">getRequirements</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="n">expr_tensor_requirements</span><span class="p">:</span>
+            <span class="c1"># check that all ExprTensor requirements satisfy restrictions</span>
+            <span class="n">requirement</span><span class="o">.</span><span class="n">_restrictionChecked</span><span class="p">(</span><span class="n">reservedVars</span><span class="p">)</span> <span class="c1"># make sure requirements don&#39;t use reserved variable in a nested scope</span>
+        
+        <span class="c1"># pass back the new requirements that are different from the ExprTensor requirements after making substitutions.</span>
+        <span class="n">old_requirements</span> <span class="o">=</span> <span class="p">{</span><span class="n">requirement</span><span class="o">.</span><span class="n">substituted</span><span class="p">(</span><span class="n">exprMap</span><span class="p">,</span> <span class="n">relabelMap</span><span class="p">,</span> <span class="n">reservedVars</span><span class="p">)</span> <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRequirements</span><span class="p">()}</span>
+        <span class="n">new_requirements</span> <span class="o">=</span> <span class="p">[</span><span class="n">requirement</span> <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="n">expr_tensor_requirements</span> <span class="k">if</span> <span class="n">requirement</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">old_requirements</span><span class="p">]</span>
+            
+        <span class="n">requirements</span> <span class="o">+=</span> <span class="n">new_requirements</span>
+        
+        <span class="k">return</span> <span class="n">expr_tensor</span></div>
+                           
+<div class="viewcode-block" id="ExprTensor.usedVars"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.usedVars">[docs]</a>    <span class="k">def</span> <span class="nf">usedVars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the union of the used Variables of the sub-Expressions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">([</span><span class="n">expr</span><span class="o">.</span><span class="n">usedVars</span> <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorting_relations</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">expr</span><span class="o">.</span><span class="n">usedVars</span><span class="p">()</span> <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">())]))</span></div>
+        
+<div class="viewcode-block" id="ExprTensor.freeVars"><a class="viewcode-back" href="../../../../../api/proveit.ExprTensor.html#proveit.ExprTensor.freeVars">[docs]</a>    <span class="k">def</span> <span class="nf">freeVars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the union of the free Variables of the sub-Expressions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">([</span><span class="n">expr</span><span class="o">.</span><span class="n">freeVars</span> <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sorting_relations</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">expr</span><span class="o">.</span><span class="n">freeVars</span><span class="p">()</span> <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">())]))</span></div></div>
+
+<span class="k">class</span> <span class="nc">ExprTensorError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../../index.html">Prove-It</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.asExpression.html">asExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.asExpressions.html">asExpressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.compositeExpression.html">compositeExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.expressionDepth.html">expressionDepth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.maybeFenced.html">maybeFenced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.maybeFencedLatex.html">maybeFencedLatex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.maybeFencedString.html">maybeFencedString</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.reset.html">reset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.safeDefaultOrDummyVar.html">safeDefaultOrDummyVar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.safeDummyVar.html">safeDummyVar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.singleOrCompositeExpression.html">singleOrCompositeExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.varIter.html">varIter</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Assumption.html">Assumption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Axiom.html">Axiom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Composite.html">Composite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Context.html">Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ContextException.html">ContextException</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.DuplicateLiteralError.html">DuplicateLiteralError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ExprList.html">ExprList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ExprListError.html">ExprListError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ExprTensor.html">ExprTensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Expression.html">Expression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Function.html">Function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Generalization.html">Generalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.GeneralizationFailure.html">GeneralizationFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.HypotheticalReasoning.html">HypotheticalReasoning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ImproperRelabeling.html">ImproperRelabeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ImproperSubstitution.html">ImproperSubstitution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Indexed.html">Indexed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.IndexedError.html">IndexedError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.InnerExpr.html">InnerExpr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.InvalidAssumptions.html">InvalidAssumptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Iter.html">Iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.KnownTruth.html">KnownTruth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Label.html">Label</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Lambda.html">Lambda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.LambdaError.html">LambdaError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Literal.html">Literal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.MakeNotImplemented.html">MakeNotImplemented</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ModusPonens.html">ModusPonens</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ModusPonensFailure.html">ModusPonensFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.NamedExprs.html">NamedExprs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Operation.html">Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.OperationError.html">OperationError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.OperationOverInstances.html">OperationOverInstances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.OperationSequence.html">OperationSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ParameterExtractionError.html">ParameterExtractionError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Proof.html">Proof</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ProofFailure.html">ProofFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.RelabelingFailure.html">RelabelingFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.ScopingViolation.html">ScopingViolation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Specialization.html">Specialization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.SpecializationFailure.html">SpecializationFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.StyleOptions.html">StyleOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Theorem.html">Theorem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.TransitiveRelation.html">TransitiveRelation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.TransitiveSequence.html">TransitiveSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.Variable.html">Variable</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.compose.html">compose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.concludeViaImplication.html">concludeViaImplication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.defaultSimplification.html">defaultSimplification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.evaluateTruth.html">evaluateTruth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.inBool.html">inBool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.isIrreducibleValue.html">isIrreducibleValue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.reduceOperands.html">reduceOperands</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.And.html">And</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Card.html">Card</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Difference.html">Difference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Disjoint.html">Disjoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Distinct.html">Distinct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Equals.html">Equals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.EvaluationError.html">EvaluationError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Exists.html">Exists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Forall.html">Forall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Iff.html">Iff</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Implies.html">Implies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.InSet.html">InSet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Intersect.html">Intersect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.IrreducibleValue.html">IrreducibleValue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Membership.html">Membership</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Nonmembership.html">Nonmembership</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Not.html">Not</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.NotEquals.html">NotEquals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.NotExists.html">NotExists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.NotInSet.html">NotInSet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.NotSubsetEq.html">NotSubsetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.NotSupersetEq.html">NotSupersetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Or.html">Or</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Set.html">Set</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.SetOfAll.html">SetOfAll</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Subset.html">Subset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.SubsetEq.html">SubsetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Superset.html">Superset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.SupersetEq.html">SupersetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.logic.Union.html">Union</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Frac.html">Frac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.GreaterEqOnlySeq.html">GreaterEqOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.GreaterOnlySeq.html">GreaterOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.LessEqOnlySeq.html">LessEqOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.LessOnlySeq.html">LessOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.greaterSequence.html">greaterSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.isLiteralInt.html">isLiteralInt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.lesserSequence.html">lesserSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.num.html">num</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Abs.html">Abs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Add.html">Add</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Ceil.html">Ceil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.DecimalSequence.html">DecimalSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Div.html">Div</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Exp.html">Exp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Floor.html">Floor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Greater.html">Greater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.GreaterEq.html">GreaterEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.GreaterSequence.html">GreaterSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Integrate.html">Integrate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.IntervalCC.html">IntervalCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.IntervalCO.html">IntervalCO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.IntervalOC.html">IntervalOC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.IntervalOO.html">IntervalOO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Len.html">Len</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Less.html">Less</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.LessEq.html">LessEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.LesserSequence.html">LesserSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Max.html">Max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Min.html">Min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Mod.html">Mod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.ModAbs.html">ModAbs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Mult.html">Mult</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Neg.html">Neg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Numeral.html">Numeral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.RealInterval.html">RealInterval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Round.html">Round</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Sqrt.html">Sqrt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Subtract.html">Subtract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/proveit.number.Sum.html">Sum</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  <li><a href="../../../../proveit.html">proveit</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Wayne Witzel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

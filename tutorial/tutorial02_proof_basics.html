@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" />
+<title>Chapter 2.  Proof Basics</title>
+
+<style type="text/css">
+/* Overrides of notebook CSS for static HTML export */
+body {
+  overflow: visible;
+  padding: 8px;
+}
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  } 
+  div.output_wrapper { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+  div.output { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+}
+</style>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="notebook.css">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+</script></head>
+<body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
+    <a href="../index.html"><img src="../pv_it.png" alt="logo" style="width:50px;float:left;position:absolute"></a> 
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Chapter-2.--Proof-Basics">Chapter 2.  Proof Basics<a class="anchor-link" href="#Chapter-2.--Proof-Basics">&#182;</a></h1><p>In <strong>Prove-It</strong>, proving an <strong>expression</strong> to be a true statement under some set of assumptions creates a <strong>known truth</strong> object and a <strong>proof</strong> object.  <strong>Prove-It</strong>, in its core, is agnostic to intrinsic truth-aptness of <strong>expressions</strong> except when they are proven and become "known truths".  The <code>proveit.logic</code> package defines the Boolean concept which may be used for making statements of the form $A \in \mathbb{B}$ (where $\mathbb{B}$ represents the Boolean set of true or false), but this is outside <strong>Prove-It</strong>'s core.  As far as the core is concerned, an <strong>expression</strong> is either proven or not; if it is not proven, it may or may not be truth-apt.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A <strong>known truth</strong> contains assumptions, as <strong>expressions</strong>, and the single <strong>expression</strong> that is known to be a true statement under these assumptions.  It also has an associated <strong>proof</strong>.  The associated <strong>proof</strong> may get updated over time with a stronger proof (fewer assumption requirements) or newer proof that is as strong and has fewer proof steps.  A <strong>proof</strong> may also be disabled (via its <code>disable</code> method) to force an alternate or avoid its use.  Conveniently, a <strong>known truth</strong> object accesses the methods of the underlying proven <strong>expression</strong> seemlessly.  Using Python tricks (specifically, overloading the <code>__getattr__</code> and <code>__dir__</code> methods), the <strong>known truth</strong> behaves in most ways as if it were the known true <strong>expression</strong> it is wrapping.  This is useful because <strong>expression</strong> objects typically have convenience methods that are specific to the kind of expression, but it is also nice to display the object as a <strong>known truth</strong> (discussed next).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A <strong>known truth</strong> with some set of assumptions ${\cal A}$ is displayed in the form ${\cal A} \vdash S$ (or simply $\vdash S$ if ${\cal A}$ is empty), where $S$ is the (conditionally) true statement.  This single turnstyle $\vdash$ is <strong>Prove-It</strong>'s indication that the <strong>expression</strong> on the right is derivable from the assumptions on the left.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For example, let us produce a trivial proof of the form $X \vdash X$:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit._common_</span> <span class="k">import</span> <span class="n">fx</span>
+<span class="o">%</span><span class="k">begin</span> proof_basics
+<span class="c1"># fx is f(x) which is simply an Operation with a Variable operator and a Variable operand,</span>
+<span class="c1"># but that is irrelevant.  It was chosen arbitrarily.</span>
+<span class="n">fx</span><span class="o">.</span><span class="n">exprInfo</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[1]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>core type</th><th>sub-expressions</th><th>expression</th></tr>
+<tr><td>0</td><td>Operation</td><td>operator:&nbsp;1<br>operand:&nbsp;2<br></td><td><a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>1</td><td>Variable</td><td></td><td><a class="ProveItLink" href="__pv_it/4d51ee1e62d011d06d4528b97697bf3da60c9de60/expr.html"><img src="__pv_it/4d51ee1e62d011d06d4528b97697bf3da60c9de60/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+<tr><td>2</td><td>Variable</td><td></td><td><a class="ProveItLink" href="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.html"><img src="__pv_it/530be409e3083890784cf1d7b28c9e67e90af9360/expr.png" style="display:inline;vertical-align:middle;" /></a></td></tr>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fxTruth</span> <span class="o">=</span> <span class="n">fx</span><span class="o">.</span><span class="n">prove</span><span class="p">(</span><span class="n">assumptions</span><span class="o">=</span><span class="p">[</span><span class="n">fx</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[2]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<strong id="fxTruth">fxTruth:</strong> <span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.html"><img src="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span><br>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>prove</code> method attempts to prove that the <strong>expression</strong> is a true statement under the given set of assumptions and returns the <strong>known truth</strong> object if it is successful.  Automation strategies may be employed in the process and will be discussed in the <a href="tutorial08_automation.ipynb">automation</a> chapter.  In this case, $f(x)$ is trivially true if we use $f(x)$ as an assumption.  Again, <strong>Prove-It</strong> is agnostic to whether or not $f(x)$ is truth-apt.  This simply says that if $f(x)$ is assumed to be a true statement, then $f(x)$ is a true statement.  If <code>prove</code> is not successful, it raises a <code>ProofFailure</code> exception.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">ProofFailure</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">fx</span><span class="o">.</span><span class="n">prove</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">ProofFailure</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EXPECTED ERROR: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EXPECTED ERROR:  Unable to prove f(x): &#39;conclude&#39; method not implemented for proof automation
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To obtain the <strong>expression</strong> from the <strong>known truth</strong>, and be able to display it as the <strong>expression</strong> only, access the <code>expr</code> attribute:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fxTruth</span><span class="o">.</span><span class="n">expr</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[4]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Its assumptions are accessible from its <code>assumptions</code> attribute (as a tuple).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fxTruth</span><span class="o">.</span><span class="n">assumptions</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[5]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(f(x),)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>But note that we may use the <code>KnownTruth</code> object as if it were the <code>Expression</code> object for most practical purposes.  It aquires all of the <code>Expression</code> object's attributes, except for some that it has overridden (such as <code>__class__</code>, <code>latex</code>, and <code>string</code>).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">fxTruth</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;__class__&#39;, &#39;__delattr__&#39;, &#39;__dict__&#39;, &#39;__dir__&#39;, &#39;__doc__&#39;, &#39;__eq__&#39;, &#39;__format__&#39;, &#39;__ge__&#39;, &#39;__getattr__&#39;, &#39;__getattribute__&#39;, &#39;__gt__&#39;, &#39;__hash__&#39;, &#39;__init__&#39;, &#39;__init_subclass__&#39;, &#39;__le__&#39;, &#39;__lt__&#39;, &#39;__module__&#39;, &#39;__ne__&#39;, &#39;__new__&#39;, &#39;__reduce__&#39;, &#39;__reduce_ex__&#39;, &#39;__repr__&#39;, &#39;__setattr__&#39;, &#39;__sizeof__&#39;, &#39;__str__&#39;, &#39;__subclasshook__&#39;, &#39;__weakref__&#39;, &#39;_addProof&#39;, &#39;_checkIfReadyForQED&#39;, &#39;_checkRelabelMap&#39;, &#39;_checkedTruth&#39;, &#39;_class_path&#39;, &#39;_clear_&#39;, &#39;_config_latex_tool&#39;, &#39;_coreInfo&#39;, &#39;_discardProof&#39;, &#39;_expandingIterRanges&#39;, &#39;_exprProofs&#39;, &#39;_extractCoreInfo&#39;, &#39;_extractExprClass&#39;, &#39;_extractInitArgs&#39;, &#39;_extractMyInitArgs&#39;, &#39;_extractReferencedObjIds&#39;, &#39;_extractStyle&#39;, &#39;_formatMultiOperator&#39;, &#39;_formatted&#39;, &#39;_generate_unique_rep&#39;, &#39;_genericExpr&#39;, &#39;_implicitOperator&#39;, &#39;_make&#39;, &#39;_meaningData&#39;, &#39;_meaning_id&#39;, &#39;_qed&#39;, &#39;_repr_html_&#39;, &#39;_requirements&#39;, &#39;_restrictionChecked&#39;, &#39;_reviseProof&#39;, &#39;_setContext&#39;, &#39;_styleData&#39;, &#39;_style_id&#39;, &#39;_subExpressions&#39;, &#39;_updateProof&#39;, &#39;_validateRelabelMap&#39;, &#39;_withMatchingStyle&#39;, &#39;asImpl&#39;, &#39;asImplication&#39;, &#39;asTheoremOrAxiom&#39;, &#39;assumptions&#39;, &#39;assumptionsSet&#39;, &#39;beginProof&#39;, &#39;conclude&#39;, &#39;concludeNegation&#39;, &#39;concludeViaImplication&#39;, &#39;context&#39;, &#39;contexts&#39;, &#39;copy&#39;, &#39;coreInfo&#39;, &#39;deriveSideEffects&#39;, &#39;displayed_expression_styles&#39;, &#39;disprove&#39;, &#39;evaluation&#39;, &#39;expr&#39;, &#39;exprInfo&#39;, &#39;extractInitArgValue&#39;, &#39;extractMyInitArgValue&#39;, &#39;findKnownTruth&#39;, &#39;forgetKnownTruths&#39;, &#39;formatted&#39;, &#39;freeMultiVars&#39;, &#39;freeVars&#39;, &#39;generalize&#39;, &#39;getRequirements&#39;, &#39;getStyle&#39;, &#39;getStyles&#39;, &#39;hasBeenProven&#39;, &#39;in_progress_to_conclude&#39;, &#39;in_progress_to_derive_sideeffects&#39;, &#39;innerExpr&#39;, &#39;isSufficient&#39;, &#39;isUsable&#39;, &#39;latex&#39;, &#39;lookup_dict&#39;, &#39;numSubExpr&#39;, &#39;operand&#39;, &#39;operand_or_operands&#39;, &#39;operands&#39;, &#39;operationClassOfOperator&#39;, &#39;operator&#39;, &#39;operator_or_operators&#39;, &#39;operators&#39;, &#39;orderOfAppearance&#39;, &#39;presumingPrefixes&#39;, &#39;presumingTheoremNames&#39;, &#39;presumingTheoremNamess&#39;, &#39;presumingTheorems&#39;, &#39;printDependents&#39;, &#39;printRequirements&#39;, &#39;proof&#39;, &#39;prove&#39;, &#39;qedInProgress&#39;, &#39;raiseUnusableProof&#39;, &#39;relabel&#39;, &#39;relabeled&#39;, &#39;remakeArguments&#39;, &#39;remakeConstructor&#39;, &#39;remakeWithStyleCalls&#39;, &#39;safeDummyVar&#39;, &#39;safeDummyVars&#39;, &#39;sideEffects&#39;, &#39;sideeffect_processed&#39;, &#39;simplification&#39;, &#39;specialize&#39;, &#39;string&#39;, &#39;styleNames&#39;, &#39;styleOptions&#39;, &#39;subExpr&#39;, &#39;subExprIter&#39;, &#39;substituted&#39;, &#39;theoremBeingProven&#39;, &#39;usedVars&#39;, &#39;withJustification&#39;, &#39;withMatchingStyle&#39;, &#39;withMatchingStyles&#39;, &#39;withStyles&#39;, &#39;withWrapAfterOperator&#39;, &#39;withWrapBeforeOperator&#39;, &#39;withWrappingAt&#39;, &#39;wrapPositions&#39;]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">fxTruth</span><span class="o">.</span><span class="n">expr</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;__class__&#39;, &#39;__delattr__&#39;, &#39;__dict__&#39;, &#39;__dir__&#39;, &#39;__doc__&#39;, &#39;__eq__&#39;, &#39;__format__&#39;, &#39;__ge__&#39;, &#39;__getattribute__&#39;, &#39;__gt__&#39;, &#39;__hash__&#39;, &#39;__init__&#39;, &#39;__init_subclass__&#39;, &#39;__le__&#39;, &#39;__lt__&#39;, &#39;__module__&#39;, &#39;__ne__&#39;, &#39;__new__&#39;, &#39;__reduce__&#39;, &#39;__reduce_ex__&#39;, &#39;__repr__&#39;, &#39;__setattr__&#39;, &#39;__sizeof__&#39;, &#39;__str__&#39;, &#39;__subclasshook__&#39;, &#39;__weakref__&#39;, &#39;_checkRelabelMap&#39;, &#39;_class_path&#39;, &#39;_clear_&#39;, &#39;_config_latex_tool&#39;, &#39;_coreInfo&#39;, &#39;_expandingIterRanges&#39;, &#39;_extractCoreInfo&#39;, &#39;_extractExprClass&#39;, &#39;_extractInitArgs&#39;, &#39;_extractMyInitArgs&#39;, &#39;_extractReferencedObjIds&#39;, &#39;_extractStyle&#39;, &#39;_formatMultiOperator&#39;, &#39;_formatted&#39;, &#39;_generate_unique_rep&#39;, &#39;_genericExpr&#39;, &#39;_implicitOperator&#39;, &#39;_make&#39;, &#39;_meaningData&#39;, &#39;_meaning_id&#39;, &#39;_repr_html_&#39;, &#39;_requirements&#39;, &#39;_restrictionChecked&#39;, &#39;_setContext&#39;, &#39;_styleData&#39;, &#39;_style_id&#39;, &#39;_subExpressions&#39;, &#39;_validateRelabelMap&#39;, &#39;_withMatchingStyle&#39;, &#39;conclude&#39;, &#39;concludeNegation&#39;, &#39;concludeViaImplication&#39;, &#39;context&#39;, &#39;contexts&#39;, &#39;copy&#39;, &#39;coreInfo&#39;, &#39;displayed_expression_styles&#39;, &#39;disprove&#39;, &#39;evaluation&#39;, &#39;exprInfo&#39;, &#39;extractInitArgValue&#39;, &#39;extractMyInitArgValue&#39;, &#39;formatted&#39;, &#39;freeMultiVars&#39;, &#39;freeVars&#39;, &#39;getRequirements&#39;, &#39;getStyle&#39;, &#39;getStyles&#39;, &#39;in_progress_to_conclude&#39;, &#39;innerExpr&#39;, &#39;latex&#39;, &#39;numSubExpr&#39;, &#39;operand&#39;, &#39;operand_or_operands&#39;, &#39;operands&#39;, &#39;operationClassOfOperator&#39;, &#39;operator&#39;, &#39;operator_or_operators&#39;, &#39;operators&#39;, &#39;orderOfAppearance&#39;, &#39;prove&#39;, &#39;relabeled&#39;, &#39;remakeArguments&#39;, &#39;remakeConstructor&#39;, &#39;remakeWithStyleCalls&#39;, &#39;safeDummyVar&#39;, &#39;safeDummyVars&#39;, &#39;sideEffects&#39;, &#39;simplification&#39;, &#39;string&#39;, &#39;styleNames&#39;, &#39;styleOptions&#39;, &#39;subExpr&#39;, &#39;subExprIter&#39;, &#39;substituted&#39;, &#39;usedVars&#39;, &#39;withJustification&#39;, &#39;withMatchingStyle&#39;, &#39;withStyles&#39;, &#39;withWrapAfterOperator&#39;, &#39;withWrapBeforeOperator&#39;, &#39;withWrappingAt&#39;, &#39;wrapPositions&#39;]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fxTruth</span><span class="o">.</span><span class="n">operands</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[8]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<a class="ProveItLink" href="__pv_it/c31dc9fec092400b99d255b4d8fb2898ff247b6e0/expr.html"><img src="__pv_it/c31dc9fec092400b99d255b4d8fb2898ff247b6e0/expr.png" style="display:inline;vertical-align:middle;" /></a>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">fxTruth</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="c1"># this is a giveaway that it is not an actual Expression</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;class &#39;proveit._core_.known_truth.KnownTruth&#39;&gt;
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">fxTruth</span><span class="o">.</span><span class="n">expr</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="c1"># here it is</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;class &#39;proveit._core_.expression.operation.function.Function&#39;&gt;
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Proof-objects">Proof objects<a class="anchor-link" href="#Proof-objects">&#182;</a></h3><p>Call the <code>proof</code> method of the <strong>KnownTruth</strong> to access the associated <strong>Proof</strong> object that proves the known truth.  A <strong>Proof</strong> is a DAG (directed, acyclic graph) of derivation steps that connect the known truth to <em>axioms</em>, <em>theorems</em>, or <em>assumptions</em>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fxTruth</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[11]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.html"><img src="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <strong>KnownTruth</strong> that is proven by a <strong>Proof</strong> object is accessible via the <code>provenTruth</code> attribute.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fxTruth</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span><span class="o">.</span><span class="n">provenTruth</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[12]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.html"><img src="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The required sub-proofs are accessible via <code>requiredProofs</code>.  In this example, this is an empty list.  $\{f(x)\} \vdash f(x)$ has no requirements.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fxTruth</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span><span class="o">.</span><span class="n">requiredProofs</span> <span class="c1"># no requirements for {f(x)} |- f(x)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[13]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is a trivial example.  In the next few tutorial chapters, we will be examining the different kinds of derivation steps for making proofs and we will see more interesting examples of <strong>known truths</strong> and <strong>proofs</strong>.  For now, we simply note that <strong>proof</strong> display is similar to the way that the <strong>expression</strong> DAG is displayed using <code>exprInfo</code>.  The "root" node is the known truth that is proven and is indexed as <code>0</code>.  In general, with exception to trivial examples like this one, it will have requirements supplied as a list of other indices (similarly to the <strong>sub-expressions</strong> in <code>exprInfo</code>).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Default-assumptions">Default assumptions<a class="anchor-link" href="#Default-assumptions">&#182;</a></h3><p>If you do not supply a set of assumptions into the <code>prove</code> method (or any other <strong>Prove-It</strong> method that accepts an <code>assumptions</code> argument), it will use <code>proveit._core_.defaults.defaults.assumptions</code> (aliased as <code>proveit.defaults.assumptions</code>).  By default, this "default" is the empty set, but it can be changed for convenience.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">proveit</span> <span class="k">import</span> <span class="n">defaults</span>
+<span class="n">defaults</span><span class="o">.</span><span class="n">assumptions</span> <span class="o">=</span> <span class="p">[</span><span class="n">fx</span><span class="p">]</span>
+<span class="n">newFxTruth</span> <span class="o">=</span> <span class="n">fx</span><span class="o">.</span><span class="n">prove</span><span class="p">()</span>
+<span class="n">newFxTruth</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[14]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.html"><img src="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">newFxTruth</span><span class="o">.</span><span class="n">proof</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[15]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<table><tr><th>&nbsp;</th><th>step type</th><th>requirements</th><th>statement</th></tr>
+<tr><td>0</td><td>assumption</td><td></td><td><span style="font-size:20px;"><a class="ProveItLink" href="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.html"><img src="__pv_it/d0c5fc989dedd8ca4aa72d3f8410379816b3106a0/expr.png" style="display:inline;vertical-align:middle;" /></a> &#x22A2;&nbsp;<a class="ProveItLink" href="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.html"><img src="../packages/proveit/__pv_it/182d3f256e21dc75ea1ec3168bda49a871e4700a0/expr.png" style="display:inline;vertical-align:middle;" /></a></span></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">end</span> proof_basics
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Next-chapter:-Implication">Next chapter: <a href="tutorial03_implies.ipynb">Implication</a><a class="anchor-link" href="#Next-chapter:-Implication">&#182;</a></h1><h2 id="Table-of-Contents"><a href="tutorial00_introduction.ipynb#contents">Table of Contents</a><a class="anchor-link" href="#Table-of-Contents">&#182;</a></h2>
+</div>
+</div>
+</div>
+    </div>
+  </div>
+<footer>
+  <p>These web pages were generated on 2019-07-14 by <a href="https://github.com/PyProveIt/Prove-It">Prove-It</a> Beta Version 0.3, licensed under the GNU Public License by Sandia Corporation.</p>
+  <p>Presented proofs are not absolutely guaranteed.  For assurance, it is important to check the structure 
+  of the statement being proven, independently verify the derivation steps, track dependencies, and ensure that 
+  employed axioms are valid and properly structured.  Inconsistencies may exist, unknowingly, in this system.
+  </p>
+  <p>
+  This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research, under the Quantum Computing Application Teams program. Sandia National Labs is managed and operated by National Technology and Engineering Solutions of Sandia, LLC, a subsidiary of Honeywell International, Inc., for the U.S. Dept. of Energy's NNSA under contract DE-NA0003525. The views expressed above do not necessarily represent the views of the DOE or the U.S. Government.
+  </p>
+  <br>
+  <p>Please send questions/comments to: <a href="mailto:wwitzel@sandia.gov">
+  wwitzel@sandia.gov</a>.</p>
+</footer> 
+</body>
+
+ 
+
+
+</html>

@@ -1,0 +1,504 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ExprTensor &#8212; Prove-It 0.3 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Expression" href="proveit.Expression.html" />
+    <link rel="prev" title="ExprListError" href="proveit.ExprListError.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="exprtensor">
+<h1>ExprTensor<a class="headerlink" href="#exprtensor" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="proveit.ExprTensor">
+<em class="property">class </em><code class="descclassname">proveit.</code><code class="descname">ExprTensor</code><span class="sig-paren">(</span><em>tensor</em>, <em>shape=None</em>, <em>styles=None</em>, <em>assumptions=None</em>, <em>requirements=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="proveit.Composite.html#proveit.Composite" title="proveit._core_.expression.composite.composite.Composite"><code class="docutils literal notranslate"><span class="pre">proveit.Composite</span></code></a>, <a class="reference internal" href="proveit.Expression.html#proveit.Expression" title="proveit._core_.expression.expr.Expression"><code class="docutils literal notranslate"><span class="pre">proveit.Expression</span></code></a></p>
+<p>An ExprTensor is a composite Expression representing
+an n-dimensional tensor.  It serves to map n-coordinate 
+“locations” to Expression elements.  The coordinates may 
+be general Expressions that are intended to represent 
+Integer numbers.</p>
+<p>The ExprTensor stores entries in terms of “relative
+element locations”.  For each axis, all relevent coordinate 
+expressions are sorted into a sorting-relation expression 
+(for example, “a &lt; b &lt;= c = d &lt; e”, or some such form).  
+The index of these  operands serve as coordinates for 
+the “relative element locations”.  We can translate from 
+one “location” representation to the other using the
+coordinate sorting relations.</p>
+<p>There may be Embed Expression elements for embedding
+a tensor within the tensor that may be substituted into
+the outer tensor.  When this happens, new coordinates may
+be added, generating new coordinate sorting relations.
+A specialization step that results in such a substitution
+will be conditioned upon the proof of any new coordinate
+sorting relations (these are extra conditions in addition
+to any explicit conditions of the universal quantifier(s)
+being specialized).</p>
+<p>Axioms involving an ExprTensor should properly be stated
+by way of an implication – the statement involving
+the ExprTensor is the consequent that is only valid
+provided the coordinate sorting relations, in the
+antecedent, is true.  Corresponding theorems can then be
+proven by showing that the coordinate sorting relations
+are true (under the conditions of any universal quantifiers
+or other axioms).</p>
+<p class="rubric">Methods Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.endCorner" title="proveit.ExprTensor.endCorner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">endCorner</span></code></a>(tensor_entry_loc)</td>
+<td>Given an absolute tensor entry location, return the absolute location for the “end-corner” of the entry.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.entryRanges" title="proveit.ExprTensor.entryRanges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">entryRanges</span></code></a>(base,&nbsp;start_indices,&nbsp;…)</td>
+<td>For each entry of the tensor that is fully or partially contained in the window defined via start_indices and end_indices (as Expressions that can be provably sorted against tensor coordinates), yield the start and end of the intersection of the entry range and the window.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.freeVars" title="proveit.ExprTensor.freeVars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">freeVars</span></code></a>()</td>
+<td>Returns the union of the free Variables of the sub-Expressions.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.getElem" title="proveit.ExprTensor.getElem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getElem</span></code></a>(indices[,&nbsp;base,&nbsp;assumptions,&nbsp;…])</td>
+<td>Return the tensor element at the indices location, given as an Expression, using the given assumptions as needed to interpret the location expression.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.items" title="proveit.ExprTensor.items"><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code></a>()</td>
+<td>Yield each relative entry location and corresponding element.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.keys" title="proveit.ExprTensor.keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code></a>()</td>
+<td>Returns the relative entry location keys</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.latex" title="proveit.ExprTensor.latex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">latex</span></code></a>([fence])</td>
+<td>Return a latex-formatted representation of the Expression.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.locAsExprs" title="proveit.ExprTensor.locAsExprs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">locAsExprs</span></code></a>(loc)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.numEntries" title="proveit.ExprTensor.numEntries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numEntries</span></code></a>()</td>
+<td>Return the number of tensor entries.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.relEndCorner" title="proveit.ExprTensor.relEndCorner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">relEndCorner</span></code></a>(rel_entry_loc)</td>
+<td>Given a relative location of one of the tensor entries, return the relative location for the “end-corner” of the entry.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.relEntryLoc" title="proveit.ExprTensor.relEntryLoc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">relEntryLoc</span></code></a>(loc)</td>
+<td>Return the relative entry location given the absolute tensor location.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.relEntryLocation" title="proveit.ExprTensor.relEntryLocation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">relEntryLocation</span></code></a>(self,&nbsp;loc,&nbsp;…)</td>
+<td>Return the relative entry location given the absolute tensor location using  the given relations for sorting the absolute tensor coordinates.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.remakeArguments" title="proveit.ExprTensor.remakeArguments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remakeArguments</span></code></a>()</td>
+<td>Yield the argument (key, value) pairs that could be used to  recreate the ExprTensor.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.string" title="proveit.ExprTensor.string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code></a>([fence])</td>
+<td>Return a string representation of the Expression.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.substituted" title="proveit.ExprTensor.substituted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">substituted</span></code></a>(exprMap[,&nbsp;relabelMap,&nbsp;…])</td>
+<td>Returns this expression with the substitutions made  according to exprMap and/or relabeled according to relabelMap.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.tensorLoc" title="proveit.ExprTensor.tensorLoc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tensorLoc</span></code></a>(rel_entry_loc)</td>
+<td>Return the absolute tensor location given the relative entry location.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.tensorLocation" title="proveit.ExprTensor.tensorLocation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tensorLocation</span></code></a>(self,&nbsp;rel_entry_loc,&nbsp;…)</td>
+<td>Return the absolute tensor location given the relative entry location using  the given relations for sorting the absolute tensor coordinates.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.usedVars" title="proveit.ExprTensor.usedVars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">usedVars</span></code></a>()</td>
+<td>Returns the union of the used Variables of the sub-Expressions.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#proveit.ExprTensor.values" title="proveit.ExprTensor.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a>()</td>
+<td>Yield each tensor element.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#proveit.ExprTensor.yieldLocationDeltas" title="proveit.ExprTensor.yieldLocationDeltas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">yieldLocationDeltas</span></code></a>(axis)</td>
+<td>For the given axis, yield the difference between each successive coordinate at which an element is explicitly located for this tensor (or where an Embed block ends).</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="proveit.ExprTensor.endCorner">
+<code class="descname">endCorner</code><span class="sig-paren">(</span><em>tensor_entry_loc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.endCorner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.endCorner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an absolute tensor entry location,
+return the absolute location for the “end-corner” of
+the entry.  If the entry is an Iter, then this
+absolute end corner gives the range of the
+iteration inclusively.  Otherwise, the end-corner is
+simply tensor_entry_loc; that is, the start and the 
+end are the same for single-element entries.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.entryRanges">
+<code class="descname">entryRanges</code><span class="sig-paren">(</span><em>base</em>, <em>start_indices</em>, <em>end_indices</em>, <em>assumptions</em>, <em>requirements</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.entryRanges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.entryRanges" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each entry of the tensor that is fully or partially contained in the window defined
+via start_indices and end_indices (as Expressions that can be provably sorted
+against tensor coordinates), yield the start and end of the intersection of the
+entry range and the window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.freeVars">
+<code class="descname">freeVars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.freeVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.freeVars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the union of the free Variables of the sub-Expressions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.getElem">
+<code class="descname">getElem</code><span class="sig-paren">(</span><em>indices</em>, <em>base=0</em>, <em>assumptions=None</em>, <em>requirements=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.getElem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.getElem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the tensor element at the indices location, given
+as an Expression, using the given assumptions as needed
+to interpret the location expression.  Required
+truths, proven under the given assumptions, that 
+were used to make this interpretation will be
+appended to the given ‘requirements’ (if provided).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.items">
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield each relative entry location and corresponding element.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.keys">
+<code class="descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the relative entry location keys</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.latex">
+<code class="descname">latex</code><span class="sig-paren">(</span><em>fence=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.latex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.latex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a latex-formatted representation of the Expression.  The kwargs can contain formatting
+directives (such as ‘fence’ used to indicate when a sub-expression should be wrapped in
+parentheses if there can be ambiguity in the order of operations).</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="proveit.ExprTensor.locAsExprs">
+<em class="property">static </em><code class="descname">locAsExprs</code><span class="sig-paren">(</span><em>loc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.locAsExprs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.locAsExprs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.numEntries">
+<code class="descname">numEntries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.numEntries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.numEntries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of tensor entries.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.relEndCorner">
+<code class="descname">relEndCorner</code><span class="sig-paren">(</span><em>rel_entry_loc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.relEndCorner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.relEndCorner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a relative location of one of the tensor entries,
+return the relative location for the “end-corner” of
+the entry.  If the entry is an Iter, then this
+relative end corner gives the relative range of the
+iteration inclusively.  Otherwise, the end-corner is
+simply rel_loc; that is, the start and the end are
+the same for single-element entries.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.relEntryLoc">
+<code class="descname">relEntryLoc</code><span class="sig-paren">(</span><em>loc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.relEntryLoc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.relEntryLoc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the relative entry location given the absolute tensor location.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="proveit.ExprTensor.relEntryLocation">
+<em class="property">static </em><code class="descname">relEntryLocation</code><span class="sig-paren">(</span><em>self</em>, <em>loc</em>, <em>coord_sorting_relations</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.relEntryLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.relEntryLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the relative entry location given the absolute tensor location using 
+the given relations for sorting the absolute tensor coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.remakeArguments">
+<code class="descname">remakeArguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.remakeArguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.remakeArguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield the argument (key, value) pairs that could be used to 
+recreate the ExprTensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.string">
+<code class="descname">string</code><span class="sig-paren">(</span><em>fence=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string representation of the Expression.  The kwargs can contain formatting
+directives (such as ‘fence’ used to indicate when a sub-expression should be wrapped in
+parentheses if there can be ambiguity in the order of operations).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.substituted">
+<code class="descname">substituted</code><span class="sig-paren">(</span><em>exprMap</em>, <em>relabelMap=None</em>, <em>reservedVars=None</em>, <em>assumptions=None</em>, <em>requirements=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.substituted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.substituted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns this expression with the substitutions made 
+according to exprMap and/or relabeled according to relabelMap.
+Flattens nested tensors (or lists of lists) that arise from Embed substitutions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.tensorLoc">
+<code class="descname">tensorLoc</code><span class="sig-paren">(</span><em>rel_entry_loc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.tensorLoc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.tensorLoc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the absolute tensor location given the relative entry location.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="proveit.ExprTensor.tensorLocation">
+<em class="property">static </em><code class="descname">tensorLocation</code><span class="sig-paren">(</span><em>self</em>, <em>rel_entry_loc</em>, <em>coord_sorting_relations</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.tensorLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.tensorLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the absolute tensor location given the relative entry location using 
+the given relations for sorting the absolute tensor coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.usedVars">
+<code class="descname">usedVars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.usedVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.usedVars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the union of the used Variables of the sub-Expressions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield each tensor element.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="proveit.ExprTensor.yieldLocationDeltas">
+<code class="descname">yieldLocationDeltas</code><span class="sig-paren">(</span><em>axis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/proveit/_core_/expression/composite/expr_tensor.html#ExprTensor.yieldLocationDeltas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#proveit.ExprTensor.yieldLocationDeltas" title="Permalink to this definition">¶</a></dt>
+<dd><p>For the given axis, yield the difference between each
+successive coordinate at which an element is explicitly
+located for this tensor (or where an Embed block ends).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Prove-It</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="proveit.asExpression.html">asExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.asExpressions.html">asExpressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.compositeExpression.html">compositeExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.expressionDepth.html">expressionDepth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.maybeFenced.html">maybeFenced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.maybeFencedLatex.html">maybeFencedLatex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.maybeFencedString.html">maybeFencedString</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.reset.html">reset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.safeDefaultOrDummyVar.html">safeDefaultOrDummyVar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.safeDummyVar.html">safeDummyVar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.singleOrCompositeExpression.html">singleOrCompositeExpression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.varIter.html">varIter</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="proveit.Assumption.html">Assumption</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Axiom.html">Axiom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Composite.html">Composite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Context.html">Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ContextException.html">ContextException</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.DuplicateLiteralError.html">DuplicateLiteralError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ExprList.html">ExprList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ExprListError.html">ExprListError</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ExprTensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Expression.html">Expression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Function.html">Function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Generalization.html">Generalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.GeneralizationFailure.html">GeneralizationFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.HypotheticalReasoning.html">HypotheticalReasoning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ImproperRelabeling.html">ImproperRelabeling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ImproperSubstitution.html">ImproperSubstitution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Indexed.html">Indexed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.IndexedError.html">IndexedError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.InnerExpr.html">InnerExpr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.InvalidAssumptions.html">InvalidAssumptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Iter.html">Iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.KnownTruth.html">KnownTruth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Label.html">Label</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Lambda.html">Lambda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.LambdaError.html">LambdaError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Literal.html">Literal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.MakeNotImplemented.html">MakeNotImplemented</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ModusPonens.html">ModusPonens</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ModusPonensFailure.html">ModusPonensFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.NamedExprs.html">NamedExprs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Operation.html">Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.OperationError.html">OperationError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.OperationOverInstances.html">OperationOverInstances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.OperationSequence.html">OperationSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ParameterExtractionError.html">ParameterExtractionError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Proof.html">Proof</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ProofFailure.html">ProofFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.RelabelingFailure.html">RelabelingFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.ScopingViolation.html">ScopingViolation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Specialization.html">Specialization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.SpecializationFailure.html">SpecializationFailure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.StyleOptions.html">StyleOptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Theorem.html">Theorem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.TransitiveRelation.html">TransitiveRelation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.TransitiveSequence.html">TransitiveSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.Variable.html">Variable</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.compose.html">compose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.concludeViaImplication.html">concludeViaImplication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.defaultSimplification.html">defaultSimplification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.evaluateTruth.html">evaluateTruth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.inBool.html">inBool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.isIrreducibleValue.html">isIrreducibleValue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.reduceOperands.html">reduceOperands</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.And.html">And</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Card.html">Card</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Difference.html">Difference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Disjoint.html">Disjoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Distinct.html">Distinct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Equals.html">Equals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.EvaluationError.html">EvaluationError</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Exists.html">Exists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Forall.html">Forall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Iff.html">Iff</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Implies.html">Implies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.InSet.html">InSet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Intersect.html">Intersect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.IrreducibleValue.html">IrreducibleValue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Membership.html">Membership</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Nonmembership.html">Nonmembership</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Not.html">Not</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.NotEquals.html">NotEquals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.NotExists.html">NotExists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.NotInSet.html">NotInSet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.NotSubsetEq.html">NotSubsetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.NotSupersetEq.html">NotSupersetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Or.html">Or</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Set.html">Set</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.SetOfAll.html">SetOfAll</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Subset.html">Subset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.SubsetEq.html">SubsetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Superset.html">Superset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.SupersetEq.html">SupersetEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.logic.Union.html">Union</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Frac.html">Frac</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.GreaterEqOnlySeq.html">GreaterEqOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.GreaterOnlySeq.html">GreaterOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.LessEqOnlySeq.html">LessEqOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.LessOnlySeq.html">LessOnlySeq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.greaterSequence.html">greaterSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.isLiteralInt.html">isLiteralInt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.lesserSequence.html">lesserSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.num.html">num</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Abs.html">Abs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Add.html">Add</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Ceil.html">Ceil</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.DecimalSequence.html">DecimalSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Div.html">Div</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Exp.html">Exp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Floor.html">Floor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Greater.html">Greater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.GreaterEq.html">GreaterEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.GreaterSequence.html">GreaterSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Integrate.html">Integrate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Interval.html">Interval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.IntervalCC.html">IntervalCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.IntervalCO.html">IntervalCO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.IntervalOC.html">IntervalOC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.IntervalOO.html">IntervalOO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Len.html">Len</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Less.html">Less</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.LessEq.html">LessEq</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.LesserSequence.html">LesserSequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Max.html">Max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Min.html">Min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Mod.html">Mod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.ModAbs.html">ModAbs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Mult.html">Mult</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Neg.html">Neg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Numeral.html">Numeral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.RealInterval.html">RealInterval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Round.html">Round</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Sqrt.html">Sqrt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Subtract.html">Subtract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proveit.number.Sum.html">Sum</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="proveit.ExprListError.html" title="previous chapter">ExprListError</a></li>
+      <li>Next: <a href="proveit.Expression.html" title="next chapter">Expression</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Wayne Witzel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/api/proveit.ExprTensor.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
